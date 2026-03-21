@@ -2,7 +2,8 @@ pub use crate::other::textual_error::{TextualError, TextualErrorAttachement, Tex
 pub use crate::other::textual_error_v2::{TextualErrorContextV2, TextualErrorV2};
 pub use crate::other::uuid_v4::UuidV4;
 
-pub use crate::chronic::monotonic::{self, MonotonicInstant, MonotonicClock};
+pub use crate::chronic::monotonic_clock::{self, MonotonicInstant, MonotonicClock};
+pub use crate::chronic::uptime_clock::UserUptimeClock;
 pub use crate::chronic::countdown::{self, Countdown, CountdownStatus};
 // pub use crate::chronic::countdown::{Countdown};
 pub use crate::chronic::datetime::DateTime;

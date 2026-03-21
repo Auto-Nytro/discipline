@@ -5,5 +5,6 @@ pub mod time_range;
 pub mod weekday;
 pub mod weekday_range;
 pub mod weekday_set;
-pub mod monotonic;
+pub mod monotonic_clock;
 pub mod countdown;
+pub mod uptime_clock;

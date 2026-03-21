@@ -53,7 +53,7 @@ impl CountdownAfterPleaConditional {
       return CountdownAfterPleaConditionalStatus::Active;
     };
 
-    match countdown.status(now) {
+    match countdown.get_status(now) {
       CountdownStatus::Pending => {
         CountdownAfterPleaConditionalStatus::Active
       }

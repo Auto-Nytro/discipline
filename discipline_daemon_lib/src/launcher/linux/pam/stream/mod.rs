@@ -1,8 +1,11 @@
 mod stream_sync;
+pub use stream_sync::*;
+
 mod stream_async;
+pub use stream_async::AsyncStream;
 
 mod sizes;
-use sizes::*;
+pub use sizes::*;
 
 mod serialization;
-use serialization::*;
+pub use serialization::*;

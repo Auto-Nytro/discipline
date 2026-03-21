@@ -1,7 +1,7 @@
 use std::any::type_name;
 use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
-use crate::x::{UuidV4, AlwaysRules, TextualErrorContext, TimeRangeRules, ToTextualError};
+use crate::x::{AlwaysRules, MonotonicInstant, TextualErrorContext, Time, TimeRangeRules, ToTextualError, UuidV4, UserUptimeClock};
 use super::{UserId, UserName};
 
 #[derive(Debug, Clone)]
@@ -141,6 +141,7 @@ pub struct UserProfile {
   name: UserProfileName,
   user_id: UserId,
   user_name: UserName,
+  uptime_clock: UserUptimeClock,
   device_access_regulation: DeviceAccessRegulation,
   screen_access_regulation: ScreenAccessRegulation,
   internet_access_regulation: InternetAccessRegulation,
@@ -151,11 +152,13 @@ impl UserProfile {
     name: UserProfileName,
     user_id: UserId,
     user_name: UserName,
+    uptime_clock: UserUptimeClock,
   ) -> Self {
     Self {
       name,
       user_id,
       user_name,
+      uptime_clock,
       device_access_regulation: DeviceAccessRegulation::new(),
       screen_access_regulation: ScreenAccessRegulation::new(),
       internet_access_regulation: InternetAccessRegulation::new(),
@@ -166,6 +169,7 @@ impl UserProfile {
     name: UserProfileName,
     user_id: UserId,
     user_name: UserName,
+    uptime_clock: UserUptimeClock,
     device_access_regulation: DeviceAccessRegulation,
     screen_access_regulation: ScreenAccessRegulation,
     internet_access_regulation: InternetAccessRegulation,
@@ -174,11 +178,30 @@ impl UserProfile {
       name,
       user_id,
       user_name,
+      uptime_clock,
       device_access_regulation,
       screen_access_regulation,
       internet_access_regulation,
     }
   } 
+
+  pub fn is_session_open_blocked(
+    &self, 
+    time: Time,
+    instant: MonotonicInstant,
+  ) -> bool {
+    self.screen_access_regulation.always_rules.are_some_active(instant)
+    ||
+    self.screen_access_regulation.time_range_rules.are_some_active(time, instant)
+  }
+
+  pub fn on_user_session_opened(&self) {
+
+  }
+
+  pub fn on_user_session_closed(&self) {
+
+  }
 }
 
 pub struct UserProfilesStats {
@@ -214,23 +237,37 @@ impl UserProfilesStats {
 #[derive(Debug)]
 pub struct UserProfiles {
   user_profiles: HashMap<UuidV4, User>,
+  user_names_to_profile_ids: HashMap<UserName, UuidV4>,
 }
 
 impl UserProfiles {
   pub fn new() -> Self {
     Self {
       user_profiles: HashMap::new(),
+      user_names_to_profile_ids: HashMap::new(),
     }
   }
 
-  pub fn construct(user_profiles: HashMap<UuidV4, User>) -> Self {
+  pub fn construct(user_profiles: HashMap<UuidV4, UserProfile>) -> Self {
+    let mut user_names_to_profile_ids = HashMap::new();
+    for (key, value) in &user_profiles {
+      user_names_to_profile_ids.insert(value.user_name.clone(), key.clone());
+    }
+
     Self {
       user_profiles,
+      user_names_to_profile_ids,
     }
   }
 
-  pub fn get_user(&self, user_id: &UuidV4) -> Option<&User> {
+  pub fn get_profile_given_id(&self, user_id: &UuidV4) -> Option<&User> {
     self.user_profiles.get(user_id)
+  }
+
+  pub fn get_profile_given_user_name(&self, user_name: &UserName) -> Option<&UserProfile> {
+    let profile_id = self.user_names_to_profile_ids.get(user_name)?;
+
+    self.user_profiles.get(profile_id)
   }
 
   pub fn get_users_number(&self) -> usize {

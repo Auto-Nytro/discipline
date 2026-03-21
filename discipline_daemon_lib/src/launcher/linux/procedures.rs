@@ -1,6 +1,55 @@
 use serde::{Deserialize, Serialize};
-use crate::x::{MonotonicInstant, User, UserGroup, UserName, UuidV4, Database, operating_system, Daemon};
-use super::{database, UsersSingleton};
+use super::{Daemon, UserProfile};
+use crate::x::{RuleProtector, UuidV4};
+
+pub enum AlwaysRuleLocator {
+  UserScreen { profile_id: UuidV4 },
+  UserDevice { profile_id: UuidV4 },
+  UserInternet { profile_id: UuidV4 },
+}
+
+pub struct CreateAlwaysRule {
+  id: Option<UuidV4>,
+  locator: AlwaysRuleLocator,
+  protector: RuleProtector,
+}
+
+pub enum CreateAlwaysRuleReturn {
+  NoSuchUser,
+  InternalError,
+  Success,
+}
+
+pub enum CreateAlwaysRuleContext<'a> {
+  UserInternet(&'a UserProfile),
+  UserDevice(&'a UserProfile),
+  UserScreen(&'a UserProfile),
+}
+
+impl CreateAlwaysRule {
+  pub fn execute(self, daemon: &Daemon) -> CreateAlwaysRuleReturn {
+    let it = match self.locator {
+      AlwaysRuleLocator::UserDevice { profile_id } => {
+        match daemon
+          .state
+          .user_profiles
+          .get_profile_given_id(&profile_id)
+        {
+          Some(value) => {
+            CreateAlwaysRuleContext::UserDevice(value)
+          }
+          None => {
+            return CreateAlwaysRuleReturn::NoSuchUser;
+          }
+        }
+      }
+    }    
+  }
+}
+
+pub struct CreateRule {
+
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AddUserReturn {

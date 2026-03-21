@@ -1,6 +1,7 @@
-use crate::x::UuidV4;
-use super::UserProfile;
+use crate::x::MonotonicClock;
+use super::UserProfiles;
 
 pub struct State {
-  user_profiles: HashMap<UuidV4, UserProfile>,
+  pub user_profiles: UserProfiles,
+  pub monotonic_clock: MonotonicClock,
 }

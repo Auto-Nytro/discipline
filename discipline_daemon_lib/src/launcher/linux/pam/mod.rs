@@ -2,7 +2,11 @@ use super::*;
 use super::super::*;
 
 mod stream;
+use stream::*;
+
 mod protocol;
+pub use protocol::*;
+
 mod module;
 
 // use super::*;

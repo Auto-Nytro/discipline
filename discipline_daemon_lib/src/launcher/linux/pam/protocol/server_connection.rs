@@ -11,42 +11,56 @@ impl ServerStream {
     Self { stream }
   }
 
-  pub async fn recv_establish_connection(
+  pub async fn read_establish_connection(
     &mut self,
     textual_error: &mut impl IsTextualError,
   ) -> Result<EstablishConnection, ()> {
-    self.stream.recv(textual_error).await
+    self.stream.read(
+      &BincodeSerializationFormat,
+      textual_error,
+    ).await
   }
 
-  pub async fn send_establish_connection_reply(
+  pub async fn write_establish_connection_reply(
     &mut self,
     reply: EstablishConnectionReply,
     textual_error: &mut impl IsTextualError,
   ) -> Result<(), ()> {
-    self.stream.send(&reply, textual_error).await
+    self.stream.write(
+      &reply, 
+      &BincodeSerializationFormat,
+      textual_error,
+    ).await
   }
 
-  pub async fn recv_client_message(
+  pub async fn read_client_message(
     &mut self,
     textual_error: &mut impl IsTextualError,
   ) -> Result<ClientMessage, ()> {
-    self.stream.recv(textual_error).await
+    self.stream.read(
+      &BincodeSerializationFormat,
+      textual_error,
+    ).await
   }
 
-  // pub fn send_client_message(
+  // pub fn write_client_message(
   //   &mut self,
   //   client_message: &ClientMessage,
   //   textual_error: &mut impl IsTextualError,
   // ) -> Result<(), ()> {
-  //   self.stream.send(client_message, textual_error)
+  //   self.stream.write(client_message, textual_error)
   // }
 
-  pub async fn send_is_user_session_open_blocked_reply(
+  pub async fn write_is_user_session_open_blocked_reply(
     &mut self,
     client_message: &IsUserSessionOpenBlockedReply,
     textual_error: &mut impl IsTextualError,
   ) -> Result<(), ()> {
-    self.stream.send(client_message, textual_error).await
+    self.stream.write(
+      client_message, 
+      &BincodeSerializationFormat,
+      textual_error,
+    ).await
   }
 }
 
@@ -60,9 +74,10 @@ impl ServerConnection {
     authentication_token: &AuthenticationToken,
     textual_error: &mut impl IsTextualError,
   ) -> Result<Self, ()> {
-    let mut textual_error = textual_error.optional_context("Discipline Linux-PAM Module Server establishing a connection with client");
+    let mut textual_error = textual_error
+      .optional_context("Discipline Linux-PAM Module Server establishing a connection with client");
 
-    let establish_connection = match stream.recv_establish_connection(&mut textual_error).await {
+    let establish_connection = match stream.read_establish_connection(&mut textual_error).await {
       Ok(value) => {
         value
       }
@@ -77,7 +92,7 @@ impl ServerConnection {
 
       let reply = EstablishConnectionReply::UnrecognizedAuthenticationToken;
       let mut textual_error = textual_error.optional_context("Sending EstablishConnectionReply::IncorrectPassword message to client");
-      if let Err(()) = stream.send_establish_connection_reply(reply, &mut textual_error).await {
+      if let Err(()) = stream.write_establish_connection_reply(reply, &mut textual_error).await {
         textual_error.add_message("Failed to send an ")
       }
 
@@ -86,7 +101,7 @@ impl ServerConnection {
 
     let reply = EstablishConnectionReply::ConnectionEstablished;
     let mut textual_error = textual_error.optional_context("Sending EstablishConnectionReply::ConnectionEstablished");
-    if let Err(()) = stream.send_establish_connection_reply(reply, &mut textual_error).await {
+    if let Err(()) = stream.write_establish_connection_reply(reply, &mut textual_error).await {
       return Err(());
     }
 
@@ -96,7 +111,7 @@ impl ServerConnection {
     // TextualError::new("Discipline Linux-PAM Module Server establishing a connection with client")
 
     // let message: EstablishConnection = connection
-    //   .recv_or_textual_error()
+    //   .read_or_textual_error()
     //   .await
     //   .map_err(|error| {
     //   })?;
@@ -116,7 +131,7 @@ impl ServerConnection {
     // }
 
     // connection
-    //   .send_or_textual_error(&EstablishConnectionReply::ConnectionEstablished)
+    //   .write_or_textual_error(&EstablishConnectionReply::ConnectionEstablished)
     //   .await
     //   .map_err(|error| {
     //     error
@@ -129,7 +144,7 @@ impl ServerConnection {
     loop {
       let mut textual_error = OptionalTextualErrorContext::new("Discipline Daemon Linux-PAM Server Connection processing incoming messages");
 
-      let client_message: ClientMessage = match self.stream.recv_client_message(&mut textual_error).await {
+      let client_message: ClientMessage = match self.stream.read_client_message(&mut textual_error).await {
         Ok(value) => {
           value
         }
@@ -150,7 +165,7 @@ impl ServerConnection {
           
           if let Err(()) = self
             .stream
-            .send_is_user_session_open_blocked_reply(&message, &mut textual_error)
+            .write_is_user_session_open_blocked_reply(&message, &mut textual_error)
             .await
           {
             eprintln!("{textual_error}");

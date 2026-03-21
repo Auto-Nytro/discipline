@@ -1,16 +1,19 @@
 use std::path::PathBuf;
-use crate::x::{TextualErrorV2};
-use super::{State, Database, Api, UserNameRef};
+use crate::x::{DateTime, TextualErrorV2};
+use super::{State, Database, Api, UserName, pam};
 
 pub struct LaunchConfiguration {
   pub api_server_port: u16,
   pub database_directory: PathBuf,
+  pub pam_server_path: PathBuf,
+  pub pam_client_authentication_token: pam::AuthenticationToken,
 }
 
 pub struct Daemon {
+  pub state: State,
   database: Database,
-  state: State,
-  api: Api,
+  api_server: Api,
+  pam_server: pam::Server,
 }
 
 impl Daemon {
@@ -35,40 +38,50 @@ impl Daemon {
       &mut textual_error_context,
     )?;
 
+    let pam_server = pam::Server::new(
+      configuration.pam_server_path, 
+      configuration.pam_client_authentication_token, 
+      textual_error,
+    )?;
+
     Ok(Self {
-      api,
+      api_server: api,
       state,
       database,
+      pam_server,
     })
   }
 
-  pub fn is_user_session_open_blocked(&self, user_name: UserNameRef<'_>) -> bool {
-    todo!()
+  pub fn is_user_session_open_blocked(&self, user_name: &UserName) -> bool {
+    self
+      .state
+      .user_profiles
+      .get_profile_given_user_name(user_name)
+      .map(|profile| {
+        let time = DateTime::now().time();
+        let instant = self.state.monotonic_clock.now();
+        profile.is_session_open_blocked(time, instant)
+      })
+      .unwrap_or(false)
   }
-  pub fn on_user_session_opened(&self, user_name: UserNameRef<'_>) {
-    
-  }
-  pub fn on_user_session_closed(&self, user_name: UserNameRef<'_>) {
-    
-  }
-  // pub async fn start(self: Arc<Self>) {
-  //   _ = self.clone().api_server.start_auto_serving(self).await;
-  // }
 
-  // pub async fn is_user_permitted_to_open_session(&self, user_name: operating_system::UserNameRef<'_>) -> bool {
-  //   let user_group = self.state.users.read().await;
-  //   let user = user_group.get_user_by_operating_system_user_name(user_name);
-  //   let Some(user) = user else {
-  //     return true;
-  //   };
+  pub fn on_user_session_opened(&self, user_name: &UserName) {
+    self
+      .state
+      .user_profiles
+      .get_profile_given_user_name(user_name)
+      .map(|profile| {
+        profile.on_user_session_opened();
+      });
+  }
 
-  //   let now = self.state.clock.read().await.now();
-  //   let user = user.read().await;
-  //   user
-  //     .regulation_info
-  //     .block_account_access
-  //     .rules
-  //     .are_some_rules_enabled(now)
-  //     .not()
-  // }
+  pub fn on_user_session_closed(&self, user_name: &UserName) {
+    self
+      .state
+      .user_profiles
+      .get_profile_given_user_name(user_name)
+      .map(|profile| {
+        profile.on_user_session_closed();
+      });
+  }
 }

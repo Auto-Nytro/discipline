@@ -1,99 +1,320 @@
 use std::path::PathBuf;
-use crate::IsTextualError;
-use super::super::UserNameRef;
-use super::{Stream, EstablishConnectionRef, EstablishConnectionReply, EstablishConnectionError, IsUserSessionOpenBlockedRef, IsUserSessionOpenBlockedReply, UserSessionClosedNotificationRef, UserSessionOpenedNotificationRef, AuthenticationToken};
+use crate::x::IsTextualError;
+use super::{
+  UserNameRef, 
+  BlockingStream, 
+  BufferLength, 
+  BincodeSerializationFormat, 
+  EstablishConnectionRef, 
+  EstablishConnectionReply, 
+  EstablishConnectionError, 
+  IsUserSessionOpenBlockedRef, 
+  ClientMessageRef,
+  IsUserSessionOpenBlockedReply, 
+  UserSessionClosedNotificationRef, 
+  UserSessionOpenedNotificationRef, 
+  AuthenticationToken,
+};
 
-pub struct ClientStream {
-  stream: Stream,
+
+// TODO
+pub const MAXIMUM_MESSAGE_LENGTH: BufferLength = BufferLength::create_or_panic(7987);
+
+struct ClientStream {
+  path: PathBuf,
+  stream: BlockingStream,
+  closed: bool,
 }
 
 impl ClientStream {
-  pub fn construct(stream: Stream) -> Self {
-    Self { stream }
+  pub fn construct(
+    path: PathBuf,
+    stream: BlockingStream,
+  ) -> Self {
+    Self {
+      path,
+      stream,
+      closed,
+    }
   }
 
-  pub fn send_establish_connection(
+  fn ensure_connected(
+    &mut self,
+    path: &Path,
+    textual_error: &mut impl IsTextualError,
+  ) -> Result<(), ()> {
+    if self.closed {
+      self.stream.reconnect(
+        &self.path, 
+        &mut textual_error.change_context("Discipline Linux-PAM Client Stream reconnecting after closing due to an eariler error"),
+      )?;
+    }
+    
+    Ok(())
+  }
+
+  fn shutdown(
+    &mut self, 
+    textual_error: &mut impl IsTextualError,
+  ) -> Result<(), ()> {
+    self.stream.shutdown(textual_error)
+  }
+
+  fn write_establish_connection(
     &mut self, 
     authentication_token: &AuthenticationToken, 
     textual_error: &mut impl IsTextualError,
   ) -> Result<(), ()> {
-    self.stream.send(
-      &EstablishConnectionRef {
-        authentication_token,
-      }, 
+    self 
+      .stream 
+      .ensure_connected(
+        &self.path, 
+        &mut textual_error,
+      )?;
+
+    self.stream.write(
+      &EstablishConnectionRef { authentication_token }, 
+      &BincodeSerializationFormat,
       textual_error,
     )
   }
 
-  pub fn recv_establish_connection_repl(
+  fn read_establish_connection_repl(
     &mut self,
     textual_error: &mut impl IsTextualError
   ) -> Result<EstablishConnectionReply, ()> {
-    self.stream.recv(textual_error)
+    if let Err(()) = self.ensure_connected(&self.path, &mut textual_error) {
+      self.shutdown(textual_error)?;
+      return Err(());
+    }
+    
+    let format = BincodeSerializationFormat;
+
+    match self.stream.read(&format, textual_error) {
+      Ok(value) => {
+        Ok(value)
+      }
+      Err(()) => {
+        self.shutdown(textual_error)?;
+        return Err(());
+      }
+    }
   }
 
-  pub fn send_is_user_session_open_blocked(
+  fn write_is_user_session_open_blocked(
     &mut self,
-    user_name: UserNameRef<'_>,
+    user_name: UserNameRef,
     textual_error: &mut impl IsTextualError,
   ) -> Result<(), ()> {
-    self.stream.send(
-      &IsUserSessionOpenBlockedRef {
+    if let Err(()) = self .stream .ensure_connected(&self.path, &mut textual_error) {
+      self.shutdown(textual_error)?;
+      return Err(());
+    }
+
+    let format = BincodeSerializationFormat;
+    let message = ClientMessageRef::IsUserSessionOpenBlocked(
+      IsUserSessionOpenBlockedRef { 
         user_name,
-      },
-      textual_error,
-    )    
+      }
+    );
+
+    if let Err(()) = self.stream.write(&message, &format, textual_error) {
+      self.shutdown(textual_error)?;
+      return Err(());
+    }
+
+    Ok(())
   }
 
-  pub fn recv_is_user_session_open_blocked_reply(
+  fn read_is_user_session_open_blocked_reply(
     &mut self,
     textual_error: &mut impl IsTextualError
   ) -> Result<IsUserSessionOpenBlockedReply, ()> {
-    self.stream.recv(textual_error)
+    if let Err(()) = self .stream .ensure_connected(&self.path, &mut textual_error) {
+      self.shutdown(textual_error)?;
+      return Err(());
+    }
+
+    let format = BincodeSerializationFormat;
+
+    match self.stream.read(&format, textual_error) {
+      Ok(value) => {
+        Ok(value)
+      }
+      Err(()) => {
+        self.shutdown(textual_error)?;
+        Err(())
+      }
+    }
   }
 
-  pub fn send_user_session_opened_notification(
+  fn write_user_session_opened_notification(
     &mut self, 
     user_name: UserNameRef,
     textual_error: &mut impl IsTextualError,
   ) -> Result<(), ()> {
-    self.stream.send(
-      &UserSessionOpenedNotificationRef {
+    if let Err(()) = self .stream .ensure_connected(&self.path, &mut textual_error) {
+      self.shutdown(textual_error)?;
+      return Err(());
+    }
+
+    let format = BincodeSerializationFormat;
+
+    let message = ClientMessageRef::UserSessionOpenedNotification(
+      UserSessionOpenedNotificationRef {
         user_name,
-      },
-      textual_error,
-    )
+      }
+    );
+    
+    if let Err(()) = self.stream.write(&message, &format, textual_error) {
+      self.shutdown(textual_error)?;
+      return Err(());
+    }
+
+    Ok(())
   }
 
-  pub fn send_user_session_closed_notification(
+  fn write_user_session_closed_notification(
     &mut self, 
     user_name: UserNameRef,
     textual_error: &mut impl IsTextualError,
   ) -> Result<(), ()> {
-    self.stream.send(
-      &UserSessionClosedNotificationRef {
+    if let Err(()) = self .stream .ensure_connected(&self.path, &mut textual_error) {
+      self.shutdown(textual_error)?;
+      return Err(());
+    }
+
+    let format = BincodeSerializationFormat;
+    let message = ClientMessageRef::UserSessionClosedNotification(
+      UserSessionClosedNotificationRef {
         user_name,
-      },
-      textual_error,
-    )
+      }
+    );
+
+    if let Err(()) = self.stream.write(&message, &format, textual_error) {
+      self.shutdown(textual_error)?;
+      return Err(());
+    }
+
+    Ok(())
   }
 }
 
-// TODO
-const MAXIMUM_MESSAGE_CONTENT_LENGTH: usize = 876868686876;
+// struct ClientStream {
+//   stream: BlockingStream,
+// }
+
+// impl ClientStream {
+//   pub fn construct(stream: BlockingStream) -> Self {
+//     Self { stream }
+//   }
+
+//   fn write_establish_connection(
+//     &mut self, 
+//     authentication_token: &AuthenticationToken, 
+//     textual_error: &mut impl IsTextualError,
+//   ) -> Result<(), ()> {
+//     self.stream.write(
+//       &EstablishConnectionRef { authentication_token }, 
+//       &BincodeSerializationFormat,
+//       textual_error,
+//     )
+//   }
+
+//   fn read_establish_connection_repl(
+//     &mut self,
+//     textual_error: &mut impl IsTextualError
+//   ) -> Result<EstablishConnectionReply, ()> {
+//     self.stream.read(
+//       &BincodeSerializationFormat,
+//       textual_error,
+//     )
+//   }
+
+//   fn write_is_user_session_open_blocked(
+//     &mut self,
+//     user_name: UserNameRef,
+//     textual_error: &mut impl IsTextualError,
+//   ) -> Result<(), ()> {
+//     self.stream.write(
+//       &ClientMessageRef::IsUserSessionOpenBlocked(
+//         IsUserSessionOpenBlockedRef { 
+//           user_name,
+//         }
+//       ),
+//       &BincodeSerializationFormat,
+//       textual_error,
+//     )    
+//   }
+
+//   fn read_is_user_session_open_blocked_reply(
+//     &mut self,
+//     textual_error: &mut impl IsTextualError
+//   ) -> Result<IsUserSessionOpenBlockedReply, ()> {
+//     self.stream.read(
+//       &BincodeSerializationFormat,
+//       textual_error,
+//     )
+//   }
+
+//   fn write_user_session_opened_notification(
+//     &mut self, 
+//     user_name: UserNameRef,
+//     textual_error: &mut impl IsTextualError,
+//   ) -> Result<(), ()> {
+//     self.stream.write(
+//       &ClientMessageRef::UserSessionOpenedNotification(
+//         UserSessionOpenedNotificationRef {
+//           user_name,
+//         }
+//       ),
+//       &BincodeSerializationFormat,
+//       textual_error,
+//     )
+//   }
+
+//   fn write_user_session_closed_notification(
+//     &mut self, 
+//     user_name: UserNameRef,
+//     textual_error: &mut impl IsTextualError,
+//   ) -> Result<(), ()> {
+//     self.stream.write(
+//       &ClientMessageRef::UserSessionClosedNotification(
+//         UserSessionClosedNotificationRef {
+//           user_name,
+//         }
+//       ),
+//       &BincodeSerializationFormat,
+//       textual_error,
+//     )
+//   }
+
+//   fn ensure_connected(
+//     &mut self,
+//     path: &Path,
+//     textual_error: &mut impl IsTextualError,
+//   ) -> Result<(), ()> {
+//     self.stream.reconnect(path, textual_error)
+//   }
+// }
 
 pub struct ClientConnection {
+  path: PathBuf,
   stream: ClientStream,
-  is_closed: bool,
+  closed: bool,
 }
 
 impl ClientConnection {
   pub fn connect(
-    path: &PathBuf,
+    path: PathBuf,
     authentication_token: &AuthenticationToken, 
     textual_error: &mut impl IsTextualError,
   ) -> Result<Self, EstablishConnectionError> {
-    let stream = match Stream::connect(path, MAXIMUM_MESSAGE_CONTENT_LENGTH, textual_error) {
+    let stream = match BlockingStream::connect(
+      path, 
+      maximum_buffer_length, 
+      textual_error,
+    ) {
       Ok(value) => {
         value
       }
@@ -102,13 +323,16 @@ impl ClientConnection {
       }
     };
 
-    let mut stream = ClientStream::construct(stream);
+    let mut stream = ClientStream::construct(
+      path, 
+      stream,
+    );
     
-    if let Err(()) = stream.send_establish_connection(authentication_token, textual_error) {
+    if let Err(()) = stream.write_establish_connection(authentication_token, textual_error) {
       return Err(EstablishConnectionError::Other);
     }
 
-    let reply = match stream.recv_establish_connection_repl(textual_error) {
+    let reply = match stream.read_establish_connection_repl(textual_error) {
       Ok(value) => {
         value
       }
@@ -127,7 +351,8 @@ impl ClientConnection {
       EstablishConnectionReply::ConnectionEstablished => {
         Ok(ClientConnection { 
           stream,
-          is_closed: false,
+          path,
+          closed: false,
         })
       }
     }
@@ -138,28 +363,16 @@ impl ClientConnection {
     user_name: UserNameRef,
     textual_error: &mut impl IsTextualError,
   ) -> Result<bool, ()> {
-    let mut textual_error = textual_error.optional_context("Discipline Linux-PAM Module Client sending an IsUserSessionOpenPermitted message");
+    let mut textual_error = textual_error
+      .optional_context("Discipline Linux-PAM Module Client sending an IsUserSessionOpenPermitted message");
 
-    if self.is_closed {
-      // TODO: Add more info.
-      textual_error.add_message("The client is closed due to an eariler fatal io error");
-      return Err(());
-    }
+    self
+      .stream
+      .write_is_user_session_open_blocked(user_name, &mut textual_error)?;
 
-    if let Err(()) = self.stream.send_is_user_session_open_blocked(user_name, &mut textual_error) {
-      self.is_closed = true;
-      return Err(());
-    }
-
-    let reply = match self.stream.recv_is_user_session_open_blocked_reply(&mut textual_error) {
-      Ok(value) => {
-        value
-      }
-      Err(()) => {
-        self.is_closed = true;
-        return Err(());
-      }
-    };
+    let reply = self
+      .stream
+      .read_is_user_session_open_blocked_reply(&mut textual_error)?;
 
     Ok(reply.is_user_session_open_blocked)
   }
@@ -169,20 +382,12 @@ impl ClientConnection {
     user_name: UserNameRef,
     textual_error: &mut impl IsTextualError,
   ) -> Result<(), ()> {
-    let mut textual_error = textual_error.optional_context("Discipline Linux-PAM Module Client sending a UserSessionOpenedNotification");
+    let mut textual_error = textual_error
+      .optional_context("Discipline Linux-PAM Module Client sending a UserSessionOpenedNotification");
 
-    if self.is_closed {
-      // TODO: Add more info.
-      textual_error.add_message("The client is closed due to an eariler fatal io error");
-      return Err(());
-    }
-
-    if let Err(()) = self.stream.send_user_session_opened_notification(user_name, &mut textual_error) {
-      self.is_closed = true;
-      return Err(());
-    }
-
-    return Ok(());
+    self
+      .stream
+      .write_user_session_opened_notification(user_name, &mut textual_error) 
   }
 
   pub fn send_user_session_closed_notification(
@@ -190,19 +395,11 @@ impl ClientConnection {
     user_name: UserNameRef,
     textual_error: &mut impl IsTextualError,
   ) -> Result<(), ()> {
-    let mut textual_error = textual_error.optional_context("Discipline Linux-PAM Module Client sending a UserSessionClosedNotification");
+    let mut textual_error = textual_error
+      .optional_context("Discipline Linux-PAM Module Client sending a UserSessionClosedNotification");
 
-    if self.is_closed {
-      // TODO: Add more info.
-      textual_error.add_message("The client is closed due to an eariler fatal io error");
-      return Err(());
-    }
-
-    if let Err(()) = self.stream.send_user_session_opened_notification(user_name, &mut textual_error) {
-      self.is_closed = true;
-      return Err(());
-    }
-
-    return Ok(());
+    self
+      .stream
+      .write_user_session_opened_notification(user_name, &mut textual_error) 
   }
 }

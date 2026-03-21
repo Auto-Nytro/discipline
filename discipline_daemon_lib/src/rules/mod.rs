@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
-use crate::x::{CountdownAfterPleaConditional, CountdownConditional, TimeRange, UuidV4};
+use crate::x::{CountdownAfterPleaConditional, CountdownConditional, MonotonicInstant, Time, TimeRange, UuidV4};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RuleProtector {
@@ -8,10 +8,36 @@ pub enum RuleProtector {
   CountdownAfterPlea(CountdownAfterPleaConditional),
 }
 
+impl RuleProtector {
+  pub fn is_active(&self, now: MonotonicInstant) -> bool {
+    match self {
+      Self::Countdown(conditional) => {
+        conditional.is_activated(now)
+      }
+      Self::CountdownAfterPlea(conditional) => {
+        let status = conditional.status(now);
+        status.is_active() || status.is_deactivaing()
+      }
+    }
+  }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TimeRangeRule {
   protector: RuleProtector,
   activator: TimeRange,
+}
+
+impl TimeRangeRule {
+  pub fn is_active(
+    &self, 
+    time: Time,
+    instant: MonotonicInstant,
+  ) -> bool {
+    self.protector.is_active(instant)
+    &&
+    self.activator.contains(time)
+  }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -25,12 +51,30 @@ impl TimeRangeRules {
       rules: HashMap::new(),
     }
   }
+
+  pub fn are_some_active(
+    &self,
+    time: Time,
+    instant: MonotonicInstant,
+  ) -> bool {
+    self.rules.values().any(|rule| {
+      rule.is_active(time, instant)
+    })
+  }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AlwaysRule {
   enabled: bool,
   protector: RuleProtector,
+}
+
+impl AlwaysRule {
+  pub fn is_active(&self, now: MonotonicInstant) -> bool {
+    self.enabled 
+    &&
+    self.protector.is_active(now)
+  }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -43,6 +87,12 @@ impl AlwaysRules {
     Self {
       rules: HashMap::new(),
     }
+  }
+
+  pub fn are_some_active(&self, now: MonotonicInstant) -> bool {
+    self.rules.values().any(|rule| {
+      rule.is_active(now)
+    })
   }
 }
 

@@ -3,14 +3,14 @@ use std::sync::Arc;
 use tokio::sync::Semaphore;
 use tokio::net::UnixListener;
 use tokio::spawn;
-use crate::{IsTextualError, OptionalTextualErrorContext};
+use crate::{IsTextualError, OptionalTextualErrorContext, launcher::linux::pam::protocol::client_connection::MAXIMUM_MESSAGE_LENGTH};
 use super::*;
 
 pub struct Server {
   listener: UnixListener,
   semaphore: Arc<Semaphore>,
   authentication_token: AuthenticationToken,
-  maximum_message_length: usize,
+  maximum_message_length: BufferLength,
   maximum_concurrent_connections: usize,
 }
 
@@ -18,8 +18,6 @@ impl Server {
   pub async fn new(
     path: impl AsRef<Path>,
     authentication_token: AuthenticationToken,
-    maximum_message_length: usize,
-    maximum_concurrent_connections: usize,
     textual_error: &mut impl IsTextualError,
   ) -> Result<Self, ()> {
     let mut textual_error = textual_error.optional_context("Creating Discipline Linux-PAM Module Server");
@@ -39,8 +37,8 @@ impl Server {
       listener,
       semaphore: Arc::new(Semaphore::const_new(maximum_concurrent_connections)),
       authentication_token,
-      maximum_message_length,
-      maximum_concurrent_connections,
+      maximum_message_length: MAXIMUM_MESSAGE_LENGTH,
+      maximum_concurrent_connections: 3,
     })
   }
 

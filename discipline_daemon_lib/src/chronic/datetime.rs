@@ -1,4 +1,5 @@
-use crate::x::{Duration, TextualErrorContext, ToTextualError};
+use chrono::Timelike;
+use crate::x::{Duration, TextualErrorContext, Time, ToTextualError};
 
 #[derive(Debug, Clone)]
 pub enum CreateFromMillisecondTimestampError {
@@ -58,6 +59,26 @@ impl DateTime {
       Some(milliseconds) => {
         Duration::from_milliseconds(milliseconds.try_into().unwrap())
       }
+    }
+  }
+
+  pub fn time(&self) -> Time {
+    unsafe {
+      let time = self.inner.time();
+
+      let hour = self.inner.time().hour();
+      let minute = self.inner.time().minute();
+      let second = self.inner.time().second();
+
+      let milliseconds = (
+        time.hour() * 1000 * 60 * 60
+      ) + (
+        time.minute() * 1000 * 60
+      ) + (
+        time.second() * 1000
+      );
+
+      Time::unchecked_from_millisecond_timestamp(milliseconds)
     }
   }
 }

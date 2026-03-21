@@ -4,6 +4,8 @@ pub struct Duration {
 }
 
 impl Duration {
+  pub const MAX: Duration = Duration::from_milliseconds(u64::MAX);
+
   pub fn from_milliseconds(milliseconds: u64) -> Duration {
     Self { milliseconds }
   }
@@ -43,17 +45,11 @@ impl Duration {
   }
   
   pub fn minus_or_zero(self, rhs: Self) -> Duration {
-    match self
-      .milliseconds
-      .checked_sub(rhs.milliseconds)
-    {
-      None => {
-        Duration::zero()
-      }
-      Some(milliseconds) => {
-        Duration { milliseconds }
-      }
-    }
+    Duration::from_milliseconds(self.milliseconds.saturating_sub(rhs.milliseconds))
+  }
+
+  pub fn plus_or_zero(self, rhs: Self) -> Duration {
+    Duration::from_milliseconds(self.milliseconds.saturating_add(rhs.milliseconds))
   }
 
   pub fn milliseconds(self) -> u64 {

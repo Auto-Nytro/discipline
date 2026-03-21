@@ -1,5 +1,3 @@
-use std::sync::Arc;
-use tokio::{sync::RwLock, time::sleep};
 use crate::x::{DateTime, Duration};
 
 pub struct MonotonicClock {
@@ -48,46 +46,46 @@ impl MonotonicClock {
   }
 }
 
-pub struct SharedMonotonicClock {
-  clock: Arc<RwLock<MonotonicClock>>,
-}
+// pub struct SharedMonotonicClock {
+//   clock: Arc<RwLock<MonotonicClock>>,
+// }
 
-fn synchronization_loop_iteration(clock: &mut MonotonicClock) {
-  let current_time = DateTime::now();
+// fn synchronization_loop_iteration(clock: &mut MonotonicClock) {
+//   let current_time = DateTime::now();
 
-  let previous_synchronization_time = match clock.previous_synchronization_time {
-    None => {
-      clock.previous_synchronization_time = Some(current_time);
-      return;
-    }
-    Some(time) => {
-      time
-    }
-  };
+//   let previous_synchronization_time = match clock.previous_synchronization_time {
+//     None => {
+//       clock.previous_synchronization_time = Some(current_time);
+//       return;
+//     }
+//     Some(time) => {
+//       time
+//     }
+//   };
 
-  let interval = previous_synchronization_time
-    .till_or_zero(current_time);
+//   let interval = previous_synchronization_time
+//     .till_or_zero(current_time);
 
-  // TODO: Log an error if "clock.milliseconds" reaches the maximum value for
-  // "u64".
-  clock.total_elapsed_duration = clock.total_elapsed_duration.saturating_add(interval.milliseconds());
+//   // TODO: Log an error if "clock.milliseconds" reaches the maximum value for
+//   // "u64".
+//   clock.total_elapsed_duration = clock.total_elapsed_duration.saturating_add(interval.milliseconds());
 
-  // TODO: Update the database, too.
-}
+//   // TODO: Update the database, too.
+// }
 
-impl SharedMonotonicClock {
-  pub async fn start_synchronization_loop(self) {
-    loop {
-      let mut clock_guard = self.clock.write().await;
-      let clock = &mut *clock_guard;
-      let interval = clock.synchronization_interval.to_std_duration();
+// impl SharedMonotonicClock {
+//   pub async fn start_synchronization_loop(self) {
+//     loop {
+//       let mut clock_guard = self.clock.write().await;
+//       let clock = &mut *clock_guard;
+//       let interval = clock.synchronization_interval.to_std_duration();
       
-      synchronization_loop_iteration(clock);
-      drop(clock_guard);
-      sleep(interval).await;
-    }
-  }
-}
+//       synchronization_loop_iteration(clock);
+//       drop(clock_guard);
+//       sleep(interval).await;
+//     }
+//   }
+// }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MonotonicInstant {
@@ -113,6 +111,14 @@ impl MonotonicInstant {
     self.timestamp == other.timestamp
   }
 
+  pub fn since_or_zero(self, other: MonotonicInstant) -> Duration {
+    self
+      .timestamp
+      .checked_sub(other.timestamp)
+      .map(Duration::from_milliseconds)
+      .unwrap_or_else(Duration::zero)
+  }
+
   pub fn till_or_zero(self, other: MonotonicInstant) -> Duration {
     other
       .timestamp
@@ -121,6 +127,14 @@ impl MonotonicInstant {
       .unwrap_or_else(Duration::zero)
   }
 
+  pub fn plus_or_max(self, duration: Duration) -> MonotonicInstant {
+    self
+      .timestamp
+      .checked_add(duration.milliseconds())
+      .map(MonotonicInstant::from_timestamp)
+      .unwrap_or(MonotonicInstant::MAX)
+  }
+  
   pub fn timestamp(&self) -> u64 {
     self.timestamp
   }
