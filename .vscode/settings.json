@@ -1,12 +1,12 @@
 {
   "files.autoSave": "afterDelay",
-  "editor.fontSize": 25,
-  "editor.fontFamily": "Eirian",
+  "editor.fontSize": 26,
+  "editor.fontFamily": "Purisa",
   "rust-analyzer.linkedProjects": [
     // "dependencies/pam/Cargo.toml",
-    "dependencies/install/Cargo.toml",
+    // "dependencies/install/Cargo.toml",
     // "discipline_daemon_primitive_rs/Cargo.toml",
-    "discipline_daemon_lib/Cargo.toml",
+    // "discipline_daemon_lib/Cargo.toml",
     // "discipline_linux_pam_module/Cargo.toml",
     // "discipline_daemon/Cargo.toml",
     // "dependencies/llhttp_rs_2//llhttp/Cargo.toml",
@@ -17,4 +17,6 @@
   "rust-analyzer.inlayHints.typeHints.enable": false,
   // "rust-analyzer.inlayHints.parameterHints.enable": false,
   "deno.enable": true,
+  "java.compile.nullAnalysis.mode": "automatic",
+
 }
