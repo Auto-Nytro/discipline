@@ -1,178 +1,235 @@
-import { Branded, Duration, Option, withVirtualKey } from "../mod.ts";
+import { Duration, TextualError, Nominal, Tried } from "../x.ts";
 
-const BRAND = Symbol();
+const brand = Symbol();
 
-export type Time = Branded<typeof BRAND, number>;
+export type Time = Nominal<typeof brand, number>;
 
-const construct = (inner: number): Time => {
-  return withVirtualKey(BRAND, inner);
+export const construct = (timestamp: number): Time => {
+  return Nominal.create(brand, timestamp);
+};
+
+export const MINIMUM_TIMESTAMP = 0;
+export const MAXIMUM_TIMESTAMP = 1000 * 60 * 60 * 24 - 1;
+
+export const fromTimestamp = (timestamp: number): Tried<Time, TextualError> => {
+  if (!Number.isInteger(timestamp)) {
+    const it = TextualError.create("Creating a Time from a millisecond timestamp since midnight");
+    TextualError.addMessage(it, "Argument 'timestamp' is not an integer");
+    TextualError.addNumberAttachment(it, "Argument 'timestamp'", timestamp);
+    return Tried.Failure(it);
+  }
+
+  if (timestamp < MINIMUM_TIMESTAMP) {
+    const it = TextualError.create("Creating a Time from a millisecond timestamp since midnight");
+    TextualError.addMessage(it, "Argument 'timestamp' is less than the minimum valid value");
+    TextualError.addNumberAttachment(it, "Argument 'timestamp'", timestamp);
+    TextualError.addNumberAttachment(it, "Minimum valid value", MINIMUM_TIMESTAMP);
+    return Tried.Failure(it);
+  }
+
+  if (timestamp > MINIMUM_TIMESTAMP) {
+    const it = TextualError.create("Creating a Time from a millisecond timestamp since midnight");
+    TextualError.addMessage(it, "Argument 'timestamp' is greater than the maximum valid value");
+    TextualError.addNumberAttachment(it, "Argument 'timestamp'", timestamp);
+    TextualError.addNumberAttachment(it, "Maximum valid value", MAXIMUM_TIMESTAMP);
+    return Tried.Failure(it);
+  }
+
+  return Tried.Success(construct(timestamp));
+};
+
+export const fromHourAndMinuteAm = (hour: number, minute: number): Tried<Time, TextualError> => {
+  if (!Number.isInteger(hour)) {
+    const it = TextualError.create("Creating a Time from a hour (AM) and minute arguments");
+    TextualError.addMessage(it, "Argument 'hour' is not an integer");
+    TextualError.addNumberAttachment(it, "Argument 'hour'", hour);
+    return Tried.Failure(it);
+  }
+  if (hour < 0) {
+    const it = TextualError.create("Creating a Time from a hour (AM) and minute arguments");
+    TextualError.addMessage(it, "Argument 'hour' is less than '0'");
+    TextualError.addNumberAttachment(it, "Argument 'hour'", hour);
+    return Tried.Failure(it);
+  }
+  if (hour > 11) {
+    const it = TextualError.create("Creating a Time from a hour (AM) and minute arguments");
+    TextualError.addMessage(it, "Argument 'hour' is greater than '11'");
+    TextualError.addNumberAttachment(it, "Argument 'hour'", hour);
+    return Tried.Failure(it);
+  }
+
+  if (!Number.isInteger(minute)) {
+    const it = TextualError.create("Creating a Time from a minute (AM) and minute arguments");
+    TextualError.addMessage(it, "Argument 'minute' is not an integer");
+    TextualError.addNumberAttachment(it, "Argument 'minute'", minute);
+    return Tried.Failure(it);
+  }
+  if (minute < 0) {
+    const it = TextualError.create("Creating a Time from a minute (AM) and minute arguments");
+    TextualError.addMessage(it, "Argument 'minute' is less than '0'");
+    TextualError.addNumberAttachment(it, "Argument 'minute'", minute);
+    return Tried.Failure(it);
+  }
+  if (minute > 59) {
+    const it = TextualError.create("Creating a Time from a minute (AM) and minute arguments");
+    TextualError.addMessage(it, "Argument 'minute' is greater than '59'");
+    TextualError.addNumberAttachment(it, "Argument 'minute'", minute);
+    return Tried.Failure(it);
+  }
+
+  return Tried.Success(construct(
+    hour * Duration.MILLISECONDS_PER_HOUR
+    +
+    minute * Duration.MILLISECONDS_PER_MINUTE
+  ));
+};
+
+export const fromHourAndMinutePm = (hour: number, minute: number): Tried<Time, TextualError> => {
+  if (!Number.isInteger(hour)) {
+    const it = TextualError.create("Creating a Time from a hour (PM) and minute arguments");
+    TextualError.addMessage(it, "Argument 'hour' is not an integer");
+    TextualError.addNumberAttachment(it, "Argument 'hour'", hour);
+    return Tried.Failure(it);
+  }
+  if (hour < 0) {
+    const it = TextualError.create("Creating a Time from a hour (PM) and minute arguments");
+    TextualError.addMessage(it, "Argument 'hour' is less than '0'");
+    TextualError.addNumberAttachment(it, "Argument 'hour'", hour);
+    return Tried.Failure(it);
+  }
+  if (hour > 11) {
+    const it = TextualError.create("Creating a Time from a hour (PM) and minute arguments");
+    TextualError.addMessage(it, "Argument 'hour' is greater than '11'");
+    TextualError.addNumberAttachment(it, "Argument 'hour'", hour);
+    return Tried.Failure(it);
+  }
+
+  if (!Number.isInteger(minute)) {
+    const it = TextualError.create("Creating a Time from a minute (PM) and minute arguments");
+    TextualError.addMessage(it, "Argument 'minute' is not an integer");
+    TextualError.addNumberAttachment(it, "Argument 'minute'", minute);
+    return Tried.Failure(it);
+  }
+  if (minute < 0) {
+    const it = TextualError.create("Creating a Time from a minute (PM) and minute arguments");
+    TextualError.addMessage(it, "Argument 'minute' is less than '0'");
+    TextualError.addNumberAttachment(it, "Argument 'minute'", minute);
+    return Tried.Failure(it);
+  }
+  if (minute > 59) {
+    const it = TextualError.create("Creating a Time from a minute (PM) and minute arguments");
+    TextualError.addMessage(it, "Argument 'minute' is greater than '59'");
+    TextualError.addNumberAttachment(it, "Argument 'minute'", minute);
+    return Tried.Failure(it);
+  }
+
+  return Tried.Success(construct(
+    (12 + hour) * Duration.MILLISECONDS_PER_HOUR
+    +
+    minute * Duration.MILLISECONDS_PER_MINUTE
+  ));
+};
+
+export const fromHourAndMinute = (hour: number, minute: number): Tried<Time, TextualError> => {
+  if (!Number.isInteger(hour)) {
+    const it = TextualError.create("Creating a Time from a hour and minute arguments");
+    TextualError.addMessage(it, "Argument 'hour' is not an integer");
+    TextualError.addNumberAttachment(it, "Argument 'hour'", hour);
+    return Tried.Failure(it);
+  }
+  if (hour < 0) {
+    const it = TextualError.create("Creating a Time from a hour and minute arguments");
+    TextualError.addMessage(it, "Argument 'hour' is less than '0'");
+    TextualError.addNumberAttachment(it, "Argument 'hour'", hour);
+    return Tried.Failure(it);
+  }
+  if (hour > 23) {
+    const it = TextualError.create("Creating a Time from a hour and minute arguments");
+    TextualError.addMessage(it, "Argument 'hour' is greater than '23'");
+    TextualError.addNumberAttachment(it, "Argument 'hour'", hour);
+    return Tried.Failure(it);
+  }
+
+  if (!Number.isInteger(minute)) {
+    const it = TextualError.create("Creating a Time from a minute and minute arguments");
+    TextualError.addMessage(it, "Argument 'minute' is not an integer");
+    TextualError.addNumberAttachment(it, "Argument 'minute'", minute);
+    return Tried.Failure(it);
+  }
+  if (minute < 0) {
+    const it = TextualError.create("Creating a Time from a minute and minute arguments");
+    TextualError.addMessage(it, "Argument 'minute' is less than '0'");
+    TextualError.addNumberAttachment(it, "Argument 'minute'", minute);
+    return Tried.Failure(it);
+  }
+  if (minute > 59) {
+    const it = TextualError.create("Creating a Time from a minute and minute arguments");
+    TextualError.addMessage(it, "Argument 'minute' is greater than '59'");
+    TextualError.addNumberAttachment(it, "Argument 'minute'", minute);
+    return Tried.Failure(it);
+  }
+
+  return Tried.Success(construct(
+    hour * Duration.MILLISECONDS_PER_HOUR
+    +
+    minute * Duration.MILLISECONDS_PER_MINUTE
+  ));
+};
+
+export const getTimestamp = (it: Time): number => {
+  return Nominal.get(it);
+};
+
+export const getHour = (it: Time): number => {
+  return Math.floor(
+    getTimestamp(it) 
+    /
+    Duration.MILLISECONDS_PER_HOUR
+  );
+};
+
+export const getMinute = (it: Time): number => {
+  return Math.floor(
+    getTimestamp(it) 
+    % 
+    Duration.MILLISECONDS_PER_HOUR 
+    / 
+    Duration.MILLISECONDS_PER_MINUTE
+  );
+};
+
+export const getSecond = (it: Time): number => {
+  return Math.floor(
+    getTimestamp(it)
+    % 
+    Duration.MILLISECONDS_PER_HOUR 
+    %
+    Duration.MILLISECONDS_PER_MINUTE
+    /
+    Duration.MILLISECONDS_PER_SECOND
+  );
+};
+
+export const toString = (it: Time): string => {
+  return `${
+    getHour(it).toString()
+  }:${
+    getMinute(it).toString()
+  }:${
+    getSecond(it).toString()
+  }`;
 };
 
 export const Time = {
-  fromTimestampOrNone(timestamp: number): Option.Option<Time> => {
-    if (
-      Number.isInteger(timestamp) 
-      && 
-      timestamp >= MINIMUM_TIMESTAMP
-      &&
-      timestamp <= MAXIMUM_TIMESTAMP
-    ) {
-      return Option.Some(construct(timestamp));
-    }
-  
-    return Option.None();
-  };
-  
-  export const fromTimestampOrThrow = (timestamp: number): Time => {
-    if (
-      Number.isInteger(timestamp) 
-      && 
-      timestamp >= MINIMUM_TIMESTAMP
-      &&
-      timestamp <= MAXIMUM_TIMESTAMP
-    ) {
-      return construct(timestamp);
-    }
-  
-    throw new Error(`Creating Time from a millisecond-based timestamp since midnight: Timestamp is invalid. Timestamp: ${JSON.stringify(timestamp)}`)
-  };
-  
-  export const fromHourAndMinuteAmOrThrow = (hour: number, minute: number): Time => {
-    if (!Number.isInteger(hour)) {
-      throw new Error("Creating Time from hour (AM) and minute: Hour is not integer");
-    }
-    if (hour < 0) {
-      throw new Error("Creating Time from hour (AM) and minute: Hour is less than zero");
-    }
-    if (hour > 11) {
-      throw new Error("Creating Time from hour (AM) and minute: Hour is greater than 11");
-    }
-    if (!Number.isInteger(minute)) {
-      throw new Error("Creating Time from hour (AM) and minute: Minute is not integer");
-    }
-    if (minute < 0) {
-      throw new Error("Creating Time from hour (AM) and minute: Minute less than zero");
-    }
-    if (minute > 59) {
-      throw new Error("Creating Time from hour (AM) and minute: Minute is greater than 59");
-    }
-  
-    return construct(
-      hour * Duration.MILLISECONDS_PER_HOUR
-      +
-      minute * Duration.MILLISECONDS_PER_MINUTE
-    )
-  };
-  
-  export const fromHourAndMinutePmOrThrow = (hour: number, minute: number): Time => {
-    if (!Number.isInteger(hour)) {
-      throw new Error("Creating Time from hour (PM) and minute: Hour is not integer");
-    }
-    if (hour < 0) {
-      throw new Error("Creating Time from hour (PM) and minute: Hour is less than zero");
-    }
-    if (hour > 11) {
-      throw new Error("Creating Time from hour (PM) and minute: Hour is greater than 11");
-    }
-    if (!Number.isInteger(minute)) {
-      throw new Error("Creating Time from hour (PM) and minute: Minute is not integer");
-    }
-    if (minute < 0) {
-      throw new Error("Creating Time from hour (PM) and minute: Minute less than zero");
-    }
-    if (minute > 59) {
-      throw new Error("Creating Time from hour (PM) and minute: Minute is greater than 59");
-    }
-  
-    return construct(
-      (12 + hour) * Duration.MILLISECONDS_PER_HOUR
-      +
-      minute * Duration.MILLISECONDS_PER_MINUTE
-    );
-  };
-  
-  export const fromHourAndMinuteOrThrow = (hour: number, minute: number): Time => {
-    if (!Number.isInteger(hour)) {
-      throw new Error("Creating Time from hour and minute: Hour is not integer");
-    }
-    if (hour < 0) {
-      throw new Error("Creating Time from hour and minute: Hour is less than zero");
-    }
-    if (hour > 23) {
-      throw new Error("Creating Time from hour and minute: Hour is greater than 23");
-    }
-    if (!Number.isInteger(minute)) {
-      throw new Error("Creating Time from hour and minute: Minute is not integer");
-    }
-    if (minute < 0) {
-      throw new Error("Creating Time from hour and minute: Minute less than zero");
-    }
-    if (minute > 59) {
-      throw new Error("Creating Time from hour and minute: Minute is greater than 59");
-    }
-  
-    return construct(
-      hour * Duration.MILLISECONDS_PER_HOUR
-      +
-      minute * Duration.MILLISECONDS_PER_MINUTE
-    );
-  };
-  
-  export const timestamp = (me: Time): number => {
-    return me;
-  };
-  
-  /**
-   * @param me 
-   * @returns a number from 0 to 23, inclusive both.
-   */
-  export const getHour = (me: Time): number => {
-    return Math.floor(
-      timestamp(me) 
-      /
-      Duration.MILLISECONDS_PER_HOUR
-    );
-  };
-  /**
-   * 
-   * @param me 
-   * @returns a number from 0 to 59, inclusive both.
-   */
-  export const getMinute = (me: Time): number => {
-    return Math.floor(
-      timestamp(me) 
-      % 
-      Duration.MILLISECONDS_PER_HOUR 
-      / 
-      Duration.MILLISECONDS_PER_MINUTE
-    );
-  };
-  /**
-   * 
-   * @param me 
-   * @returns a number from 0 to 59, inclusive both.
-   */
-  export const getSecond = (me: Time): number => {
-    return Math.floor(
-      timestamp(me) 
-      % 
-      Duration.MILLISECONDS_PER_HOUR 
-      %
-      Duration.MILLISECONDS_PER_MINUTE
-      /
-      Duration.MILLISECONDS_PER_SECOND
-    );
-  };
-  
-  export const toString = (me: Time): string => {
-    return `${
-      getHour(me).toString()
-    }:${
-      getMinute(me).toString()
-    }:${
-      getSecond(me).toString
-    }`;
-  },
-}
-export const MINIMUM_TIMESTAMP = 0;
-export const MAXIMUM_TIMESTAMP = 1000 * 60 * 60 * 24 - 1;
+  MINIMUM_TIMESTAMP,
+  MAXIMUM_TIMESTAMP,
+  fromTimestamp,
+  fromHourAndMinute,
+  fromHourAndMinuteAm,
+  fromHourAndMinutePm,
+  getTimestamp,
+  getHour,
+  getMinute,
+  getSecond,
+  toString,
+};
