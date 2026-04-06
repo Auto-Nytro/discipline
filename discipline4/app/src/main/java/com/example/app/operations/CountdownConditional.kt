@@ -1,21 +1,6 @@
 package com.example.app.procedures.countdownconditional
 
-import com.example.app.Database
-import com.example.app.MonotonicClock
-import com.example.app.CountdownConditional
-import com.example.app.procedures.countdownconditional.ReactivateReturn
-
-class CountdownConditionalLocation() {
-  fun reactivateOrThrow(
-    database: Database,
-    location: CountdownConditionalLocation,
-    reactivateState: CountdownConditional.ReactivateState,
-  ) {
-
-  }
-}
-
-class CountdownConditionalDbAdapter {}
+import com.example.app.*
 
 sealed class ReactivateReturn {
   class Database(val error: Throwable) : ReactivateReturn() {}

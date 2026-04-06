@@ -14,4 +14,20 @@ public sealed class RuleEnabler {
       }
     }
   }
+
+  sealed class Creator {
+    class Countdown(val duration: Duration) : Creator() {}
+    class CountdownAfterPlea(val intervalFromPleaTillDeactivation: Duration) : Creator() {}
+
+    fun create(): RuleEnabler {
+      return when (this) {
+        is Countdown -> {
+          RuleEnabler.Countdown(CountdownConditional.create(duration))
+        }
+        is CountdownAfterPlea -> {
+          RuleEnabler.CountdownAfterPlea(CountdownAfterPleaConditional.create(intervalFromPleaTillDeactivation))
+        }
+      }
+    }
+  }
 }

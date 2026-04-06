@@ -1,6 +1,6 @@
 {
   "files.autoSave": "afterDelay",
-  "editor.fontSize": 26,
+  "editor.fontSize": 25,
   "editor.fontFamily": "Purisa",
   "rust-analyzer.linkedProjects": [
     // "dependencies/pam/Cargo.toml",
@@ -16,7 +16,7 @@
   ],
   "rust-analyzer.inlayHints.typeHints.enable": false,
   // "rust-analyzer.inlayHints.parameterHints.enable": false,
-  "deno.enable": true,
+  "deno.enable": false,
   "java.compile.nullAnalysis.mode": "automatic",
 
 }

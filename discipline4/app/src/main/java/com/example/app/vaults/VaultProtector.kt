@@ -14,4 +14,20 @@ public sealed class VaultProtector {
       }
     }
   }
+
+  sealed class Creator {
+    class Countdown(val it: Duration) : Creator() {}
+    class CountdownAfterPlea(val it: Duration) : Creator() {}
+
+    fun create(): VaultProtector {
+      return when (this) {
+        is Countdown -> {
+          VaultProtector.Countdown(CountdownConditional.create(duration))
+        }
+        is CountdownAfterPlea -> {
+          VaultProtector.CountdownAfterPlea(CountdownAfterPleaConditional.create(duration))
+        }
+      }
+    }
+  }
 }
