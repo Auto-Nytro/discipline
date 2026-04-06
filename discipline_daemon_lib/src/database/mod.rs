@@ -55,3 +55,53 @@ pub use database::Database;
 
 pub mod tables;
 pub use tables::*;
+
+use crate::IsTextualError;
+use crate::x::{CountdownConditionalActivateState};
+use crate::x::procedures::CountdownConditionalLocation;
+
+use crate::x::{CountdownAfterPleaConditionalDeactivatingState, };
+use crate::x::procedures::CountdownAfterPleaConditionalLocation;
+
+pub enum CountdownConditionalDbAdapterError {}
+
+pub struct CountdownConditionalDbAdapter {
+
+}
+
+impl CountdownConditionalDbAdapter {
+  pub fn activate(
+    &self,
+    database: &Database,
+    location: &CountdownConditionalLocation,
+    activate_state: &CountdownConditionalActivateState,
+    textual_error: &mut impl IsTextualError,
+  ) -> Result<(), CountdownConditionalDbAdapterError> {
+    todo!()
+  }
+}
+
+pub enum CountdownAfterPleaConditionalDbAdapterError {}
+
+pub struct CountdownAfterPleaConditionalDbAdapter {}
+
+impl CountdownAfterPleaConditionalDbAdapter {
+  pub fn activate(
+    &self,
+    database: &Database,
+    location: &CountdownAfterPleaConditionalLocation,
+    textual_error: &mut impl IsTextualError,
+  ) -> Result<(), CountdownAfterPleaConditionalDbAdapterError> {
+    todo!()
+  }
+  
+  pub fn redactivate(
+    &self,
+    database: &Database,
+    location: &CountdownAfterPleaConditionalLocation,
+    re_deactivate_state: &CountdownAfterPleaConditionalDeactivatingState,
+    textual_error: &mut impl IsTextualError,
+  ) -> Result<(), CountdownAfterPleaConditionalDbAdapterError> {
+    todo!()
+  }
+}

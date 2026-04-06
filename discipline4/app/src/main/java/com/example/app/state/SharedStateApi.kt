@@ -5,247 +5,241 @@ import com.example.app.State
 import com.example.app.Tried
 import com.example.app.success
 import com.example.app.failure
-import com.example.app.RuleError
+import com.example.app.TimeRangeRuleOperation
+import com.example.app.AlwaysRuleOperation
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 class Database {
-  fun addCountdownRuleOrThrow(id: UuidV4, rule: CountdownRule, locator: CountdownRuleLocator) {}
-  fun deleteCountdownRuleOrThrow(id: UuidV4, locator: CountdownRuleLocator) {}
+  fun addAlwaysRuleOrThrow(id: UuidV4, rule: AlwaysRule, locator: AlwaysRuleOperation.Location) {}
+  fun deleteAlwaysRuleOrThrow(id: UuidV4, locator: AlwaysRuleOperation.Location) {}
+  fun alwaysRuleEnablerCountdownReactivateOrThrow(
+    ruleId: UuidV4,
+    ruleLocation: AlwaysRuleOperation.Location,
+    reactivateState: CountdownConditional.ReactivateState
+  ) {}
+  fun alwaysRuleEnablerCountdownAfterPleaReactivateOrThrow(
+    ruleId: UuidV4,
+    ruleLocation: AlwaysRuleOperation.Location,
+  ) {}
+  fun alwaysRuleEnablerCountdownAfterPleaReDeactivateOrThrow(
+    ruleId: UuidV4,
+    ruleLocation: AlwaysRuleOperation.Location,
+    reDeactivateState: CountdownAfterPleaConditional.ReDeactivateState
+  ) {}
 
-  fun addTimeRangeRuleOrThrow(id: UuidV4, rule: TimeRangeRule, locator: TimeRangeRuleLocator) {}
-  fun deleteTimeRangeRuleOrThrow(id: UuidV4, locator: TimeRangeRuleLocator) {}
+  fun addTimeRangeRuleOrThrow(id: UuidV4, rule: TimeRangeRule, locator: TimeRangeRuleOperation.Location) {}
+  fun deleteTimeRangeRuleOrThrow(id: UuidV4, locator: TimeRangeRuleOperation.Location) {}
+  
+  fun addTimeAllowanceRuleOrThrow(id: UuidV4, rule: TimeAllowanceRule, locator: TimeAllowanceRuleOperation.Location) {}
+  fun deleteTimeAllowanceRuleOrThrow(id: UuidV4, locator: TimeAllowanceRuleOperation.Location) {}
 
-  fun addTimeAllowanceRuleOrThrow(id: UuidV4, rule: TimeAllowanceRule, locator: TimeAllowanceRuleLocator) {}
-  fun deleteTimeAllowanceRuleOrThrow(id: UuidV4, locator: TimeAllowanceRuleLocator) {}
+  fun addApplicationRegulationOrThrow(app: AppName, rule: ApplicationRegulation, locator: ApplicationRegulationOperation.Location) {}
+  fun deleteApplicationRegulationOrThrow(app: AppName, locator: ApplicationRegulationOperation.Location) {}
 
-  fun addCountdownRuleAtMainUserProfileScreenRegulatonOrThrow(id: UuidV4, rule: CountdownRule) {}
-  fun deleteCountdownRuleAtMainUserProfileScreenRegulatonOrThrow(id: UuidV4) {}
+  fun ruleEnablerCountdownReactivateOrThrow(
+    location: RuleEnablerCountdownOperation.Location,
+    reactivateState: CountdownConditional.ReactivateState
+  ) {}
 
-  fun addCountdownRuleAtMainUserProfileApplicationRegulatonOrThrow(id: UuidV4, rule: CountdownRule) {}
-  fun deleteCountdownRuleAtMainUserProfileApplicationRegulatonOrThrow(id: UuidV4) {}
+  fun ruleEnablerCountdownAfterPleaReactivateOrThrow(
+    location: RuleEnablerCountdownAfterPleaOperation.Location,
+  ) {}
+  
+  fun ruleEnablerCountdownAfterPleaReDeactivateOrThrow(
+    location: RuleEnablerCountdownAfterPleaOperation.Location,
+    reDeactivateState: CountdownAfterPleaConditional.ReDeactivateState
+  ) {}
 }
 
-sealed class CountdownRuleLocator {
-  class MainUserScreen : CountdownRuleLocator() {}
-  class MainUserApplicationRegulation(val app: AppName) : CountdownRuleLocator() {}
-}
 
-sealed class CountdownRuleContext {
-  class MainUserScreen : CountdownRuleContext() {}
-  class MainUserApplicationRegulation(val app: AppName, val appRule: ApplicationRegulation) : CountdownRuleContext() {}
-}
 
-sealed class TimeRangeRuleLocator {
-  class MainUserScreen : TimeRangeRuleLocator() {}
-  class MainUserApplicationRegulation(val app: AppName) : TimeRangeRuleLocator() {}
-}
+// sealed class TimeRangeRuleLocation {
+//   class MainUserScreen : TimeRangeRuleLocation() {}
+//   class MainUserApplicationRegulation(val app: AppName) : TimeRangeRuleLocation() {}
+// }
 
-sealed class TimeRangeRuleContext {
-  class MainUserScreen : TimeRangeRuleContext() {}
-  class MainUserApplicationRegulation(val app: AppName, val appRule: ApplicationRegulation) : TimeRangeRuleContext() {}
-}
+// sealed class TimeRangeRuleContext {
+//   class MainUserScreen : TimeRangeRuleContext() {}
+//   class MainUserApplicationRegulation(val app: AppName, val appRule: ApplicationRegulation) : TimeRangeRuleContext() {}
+// }
 
-sealed class TimeAllowanceRuleLocator {
-  class MainUserScreenDaily : TimeAllowanceRuleLocator() {}
-  class MainUserApplicationRegulationDaily(val app: AppName) : TimeAllowanceRuleLocator() {}
-}
+// sealed class TimeAllowanceRuleLocation {
+//   class MainUserScreenDaily : TimeAllowanceRuleLocation() {}
+//   class MainUserApplicationRegulationDaily(val app: AppName) : TimeAllowanceRuleLocation() {}
+// }
 
-sealed class TimeAllowanceRuleContext {
-  class MainUserScreenDaily : TimeAllowanceRuleContext() {}
-  class MainUserApplicationRegulationDaily(val app: AppName, val appRule: ApplicationRegulation) : TimeAllowanceRuleContext() {}
-}
+// sealed class TimeAllowanceRuleContext {
+//   class MainUserScreenDaily : TimeAllowanceRuleContext() {}
+//   class MainUserApplicationRegulationDaily(val app: AppName, val appRule: ApplicationRegulation) : TimeAllowanceRuleContext() {}
+// }
 
-sealed class RuleError {
-  class DatabaseError(val textualError: TextualError) : RuleError() {}
-  class DuplicateRuleId() : RuleError() {}
-  class PermissionDenied() : RuleError() {}
-  class NoSuchRule() : RuleError() {}
-  class NoSuchApplicationRegulation() : RuleError() {}
-  class TooManyRules() : RuleError() {}
-}
+// sealed class AlwaysRuleError {
+//   class DatabaseError(val textualError: TextualError) : AlwaysRuleError() {}
+//   class DuplicateRuleId() : AlwaysRuleError() {}
+//   class PermissionDenied() : AlwaysRuleError() {}
+//   class NoSuchRule() : AlwaysRuleError() {}
+//   class NoSuchApplicationRegulation() : AlwaysRuleError() {}
+//   class TooManyRules() : AlwaysRuleError() {}
+// }
 
 public class SharedStateApi(
   val state: State,
   val database: Database,
   val mutex: Mutex,
 ) {
-  // TODO: Create versions of the createCountdownRuleAtMainUserProfileScreenRegulaton and deleteCountdownRuleAtMainUserProfileScreenRegulaton (named createCountdownRuleAtMainUserProfileApplicationRegulaton and deleteCountdownRuleAtMainUserProfileApplicationRegulaton) functions that instead create countdown rules at the main user profile's ApplicationRegulation.countdownRules
+  // TODO: Create versions of the createAlwaysRuleAtMainUserProfileScreenRegulaton and deleteAlwaysRuleAtMainUserProfileScreenRegulaton (named createAlwaysRuleAtMainUserProfileApplicationRegulaton and deleteAlwaysRuleAtMainUserProfileApplicationRegulaton) functions that instead create countdown rules at the main user profile's ApplicationRegulation.AlwaysRules
 
-  suspend fun createCountdownRuleAtMainUserProfileScreenRegulaton(
-    idOrNull: UuidV4?,
-    duration: Duration,
-  ): Tried<Pair<UuidV4, CountdownRule>, RuleError> {
-    mutex.withLock() { 
-      if (state.rulesStats.isFull()) {
-        return Tried.failure(RuleError.TooManyRules())
-      }
+  // suspend fun createAlwaysRuleAtMainUserProfileScreenRegulaton(
+  //   idOrNull: UuidV4?,
+  //   duration: Duration,
+  // ): Tried<Pair<UuidV4, AlwaysRule>, AlwaysRuleError> {
+  //   mutex.withLock() { 
+  //     if (state.rulesStats.isFull()) {
+  //       return Tried.failure(AlwaysRuleError.TooManyRules())
+  //     }
 
-      val id = idOrNull ?: UuidV4.generateOrThrow()
+  //     val id = idOrNull ?: UuidV4.generateOrThrow()
       
-      if (state.mainUserProfile.screenRule.countdownRules.has(id)) {
-        return Tried.failure(RuleError.DuplicateRuleId())
-      }
+  //     if (state.mainUserProfile.screenRegulation.AlwaysRules.has(id)) {
+  //       return Tried.failure(AlwaysRuleError.DuplicateRuleId())
+  //     }
       
-      val rule = CountdownRule.create(Countdown.create(
-        state.monotonicClock.getNow(),
-        duration,
-      ))
+  //     val rule = AlwaysRule.create(Countdown.create(
+  //       state.monotonicClock.getNow(),
+  //       duration,
+  //     ))
 
-      try {
-        database.addCountdownRuleAtMainUserProfileScreenRegulatonOrThrow(id, rule)
-      } catch (e: TextualError) {
-        return Tried.failure(RuleError.DatabaseError(e))
-      }
+  //     try {
+  //       database.addAlwaysRuleAtMainUserProfileScreenRegulatonOrThrow(id, rule)
+  //     } catch (e: TextualError) {
+  //       return Tried.failure(AlwaysRuleError.DatabaseError(e))
+  //     }
 
-      state.mainUserProfile.screenRule.countdownRules.add(id, rule)
-      state.rulesStats.rulesNumber += 1
-      return Tried.success(id to rule)
-    }
-  }
+  //     state.mainUserProfile.screenRegulation.AlwaysRules.add(id, rule)
+  //     state.rulesStats.rulesNumber += 1
+  //     return Tried.success(id to rule)
+  //   }
+  // }
   
-  suspend fun deleteCountdownRuleAtMainUserProfileScreenRegulaton(
-    id: UuidV4,
-  ): Tried<CountdownRule, RuleError> {
-    mutex.withLock() {
-      val rule = state.mainUserProfile.screenRule.countdownRules.get(id)
-        ?: return Tried.failure(RuleError.NoSuchRule())
+  // suspend fun deleteAlwaysRuleAtMainUserProfileScreenRegulaton(
+  //   id: UuidV4,
+  // ): Tried<AlwaysRule, AlwaysRuleError> {
+  //   mutex.withLock() {
+  //     val rule = state.mainUserProfile.screenRegulation.AlwaysRules.get(id)
+  //       ?: return Tried.failure(AlwaysRuleError.NoSuchRule())
       
-      val now = state.monotonicClock.getNow()
-      if (rule.isActive(now)) {
-        return Tried.failure(RuleError.PermissionDenied())
-      }
+  //     val now = state.monotonicClock.getNow()
+  //     if (rule.isActive(now)) {
+  //       return Tried.failure(AlwaysRuleError.PermissionDenied())
+  //     }
 
-      try {
-        database.deleteCountdownRuleAtMainUserProfileScreenRegulatonOrThrow(id)
-      } catch (e: TextualError) {
-        return Tried.failure(RuleError.DatabaseError(e))
-      }
+  //     try {
+  //       database.deleteAlwaysRuleAtMainUserProfileScreenRegulatonOrThrow(id)
+  //     } catch (e: TextualError) {
+  //       return Tried.failure(AlwaysRuleError.DatabaseError(e))
+  //     }
 
-      state.rulesStats.rulesNumber -= 1
-      state.mainUserProfile.screenRule.countdownRules.remove(id)
-      return Tried.success(rule)
-    }
-  }
+  //     state.rulesStats.rulesNumber -= 1
+  //     state.mainUserProfile.screenRegulation.AlwaysRules.remove(id)
+  //     return Tried.success(rule)
+  //   }
+  // }
 
 
-  suspend fun createCountdownRuleAtMainUserProfileApplicationRegulaton(
-    app: AppName,
-    idOrNull: UuidV4?,
-    duration: Duration,
-  ): Tried<Pair<UuidV4, CountdownRule>, RuleError> {
-    mutex.withLock() { 
-      if (state.rulesStats.isFull()) {
-        return Tried.failure(RuleError.TooManyRules())
-      }
+  // suspend fun createAlwaysRuleAtMainUserProfileApplicationRegulaton(
+  //   app: AppName,
+  //   idOrNull: UuidV4?,
+  //   duration: Duration,
+  // ): Tried<Pair<UuidV4, AlwaysRule>, AlwaysRuleError> {
+  //   mutex.withLock() { 
+  //     if (state.rulesStats.isFull()) {
+  //       return Tried.failure(AlwaysRuleError.TooManyRules())
+  //     }
 
-      val id = idOrNull ?: UuidV4.generateOrThrow()
-      val applicationRegulation = state.mainUserProfile.applicationRegulations.get(app)
-        ?: return Tried.failure(RuleError.NoSuchApplicationRegulation())
+  //     val id = idOrNull ?: UuidV4.generateOrThrow()
+  //     val applicationRegulation = state.mainUserProfile.applicationRegulations.get(app)
+  //       ?: return Tried.failure(AlwaysRuleError.NoSuchApplicationRegulation())
 
-      if (applicationRegulation.countdownRules.has(id)) {
-        return Tried.failure(RuleError.DuplicateRuleId())
-      }
+  //     if (applicationRegulation.AlwaysRules.has(id)) {
+  //       return Tried.failure(AlwaysRuleError.DuplicateRuleId())
+  //     }
       
-      val rule = CountdownRule.create(Countdown.create(
-        state.monotonicClock.getNow(),
-        duration,
-      ))
+  //     val rule = AlwaysRule.create(Countdown.create(
+  //       state.monotonicClock.getNow(),
+  //       duration,
+  //     ))
 
-      try {
-        database.addCountdownRuleAtMainUserProfileApplicationRegulatonOrThrow(id, rule)
-      } catch (e: TextualError) {
-        return Tried.failure(RuleError.DatabaseError(e))
-      }
+  //     try {
+  //       database.addAlwaysRuleAtMainUserProfileApplicationRegulatonOrThrow(id, rule)
+  //     } catch (e: TextualError) {
+  //       return Tried.failure(AlwaysRuleError.DatabaseError(e))
+  //     }
 
-      applicationRegulation.countdownRules.add(id, rule)
-      state.rulesStats.rulesNumber += 1
-      return Tried.success(id to rule)
-    }
-  }
+  //     applicationRegulation.AlwaysRules.add(id, rule)
+  //     state.rulesStats.rulesNumber += 1
+  //     return Tried.success(id to rule)
+  //   }
+  // }
   
-  suspend fun deleteCountdownRuleAtMainUserProfileApplicationRegulaton(
-    app: AppName,
-    id: UuidV4,
-  ): Tried<CountdownRule, RuleError> {
-    mutex.withLock() {
-      val applicationRegulation = state.mainUserProfile.applicationRegulations.get(app)
-        ?: return Tried.failure(RuleError.NoSuchApplicationRegulation())
+  // suspend fun deleteAlwaysRuleAtMainUserProfileApplicationRegulaton(
+  //   app: AppName,
+  //   id: UuidV4,
+  // ): Tried<AlwaysRule, AlwaysRuleError> {
+  //   mutex.withLock() {
+  //     val applicationRegulation = state.mainUserProfile.applicationRegulations.get(app)
+  //       ?: return Tried.failure(AlwaysRuleError.NoSuchApplicationRegulation())
 
-      val rule = applicationRegulation.countdownRules.get(id)
-        ?: return Tried.failure(RuleError.NoSuchRule())
+  //     val rule = applicationRegulation.AlwaysRules.get(id)
+  //       ?: return Tried.failure(AlwaysRuleError.NoSuchRule())
       
-      val now = state.monotonicClock.getNow()
-      if (rule.isActive(now)) {
-        return Tried.failure(RuleError.PermissionDenied())
-      }
+  //     val now = state.monotonicClock.getNow()
+  //     if (rule.isActive(now)) {
+  //       return Tried.failure(AlwaysRuleError.PermissionDenied())
+  //     }
 
-      try {
-        database.deleteCountdownRuleAtMainUserProfileApplicationRegulatonOrThrow(id)
-      } catch (e: TextualError) {
-        return Tried.failure(RuleError.DatabaseError(e))
-      }
+  //     try {
+  //       database.deleteAlwaysRuleAtMainUserProfileApplicationRegulatonOrThrow(id)
+  //     } catch (e: TextualError) {
+  //       return Tried.failure(AlwaysRuleError.DatabaseError(e))
+  //     }
 
-      applicationRegulation.countdownRules.remove(id)
-      state.rulesStats.rulesNumber -= 1
-      return Tried.success(rule)
-    }
-  }
+  //     applicationRegulation.AlwaysRules.remove(id)
+  //     state.rulesStats.rulesNumber -= 1
+  //     return Tried.success(rule)
+  //   }
+  // }
 }
 
-sealed class CountdownRuleOperation {
-  class Create(val idOrNull: UuidV4?, val duration: Duration) : CountdownRuleOperation() {}
-  class Delete(val id: UuidV4) : CountdownRuleOperation() {}
 
-  fun Create.execute(
-    database: Database,
-    locator: CountdownRuleLocator,
-    globalStats: RulesStats,
-    rules: CountdownRules,
-  ) {
-    
-  }
-}
+// sealed class TimeAllowanceRuleOperation {
+//   class Create(val idOrNull: UuidV4?, val timeAllowance: Duration, val protection: Duration) : AlwaysRuleOperation() {}
+//   class Delete(val id: UuidV4) : AlwaysRuleOperation() {}
+// }
 
-sealed class TimeRangeRuleOperation {
-  class Create(val idOrNull: UuidV4?, val timeRange: TimeRange, val protection: Duration) : CountdownRuleOperation() {}
-  class Delete(val id: UuidV4) : CountdownRuleOperation() {}
+// sealed class ScreenRegulationOperation {
+//   class AlwaysRules(val it: AlwaysRuleOperation) : ScreenRegulationOperation() {}
+//   class TimeRangeRules(val it: TimeRangeRuleOperation) : ScreenRegulationOperation() {}
+//   class DailyTimeAllowanceRules(val it: TimeAllowanceRuleOperation) : ScreenRegulationOperation() {}
+// }
 
-  fun Create.execute(
+// sealed class ApplicationRegulationOperation {
+//   class AlwaysRules(val it: AlwaysRuleOperation) : ScreenRegulationOperation() {}
+//   class TimeRangeRules(val it: TimeRangeRuleOperation) : ScreenRegulationOperation() {}
+//   class DailyTimeAllowanceRules(val it: TimeAllowanceRuleOperation) : ScreenRegulationOperation() {}
+// }
 
-  ) {
+// sealed class ApplicationsRegulationOperation {
+//   class Create(val app: AppName) : ApplicationsRegulationOperation() {}
+//   class Delete(val app: AppName) : ApplicationsRegulationOperation() {}
+//   class Modify(val app: AppName, val it: ApplicationRegulationOperation) : ApplicationsRegulationOperation() {}
+// }
 
-  }
-}
+// sealed class UserProfileOperation {
+//   class ModifyScreenRegulation(val it: ScreenRegulationOperation) : UserProfileOperation() {}
+//   class ModifyApplicationsRegulations(val it: ApplicationsRegulationOperation) : UserProfileOperation() {}
+// }
 
-sealed class TimeAllowanceRuleOperation {
-  class Create(val idOrNull: UuidV4?, val timeAllowance: Duration, val protection: Duration) : CountdownRuleOperation() {}
-  class Delete(val id: UuidV4) : CountdownRuleOperation() {}
-}
-
-sealed class ScreenRegulationOperation {
-  class CountdownRules(val it: CountdownRuleOperation) : ScreenRegulationOperation() {}
-  class TimeRangeRules(val it: TimeRangeRuleOperation) : ScreenRegulationOperation() {}
-  class DailyTimeAllowanceRules(val it: TimeAllowanceRuleOperation) : ScreenRegulationOperation() {}
-}
-
-sealed class ApplicationRegulationOperation {
-  class CountdownRules(val it: CountdownRuleOperation) : ScreenRegulationOperation() {}
-  class TimeRangeRules(val it: TimeRangeRuleOperation) : ScreenRegulationOperation() {}
-  class DailyTimeAllowanceRules(val it: TimeAllowanceRuleOperation) : ScreenRegulationOperation() {}
-}
-
-sealed class ApplicationsRegulationOperation {
-  class Create(val app: AppName) : ApplicationsRegulationOperation() {}
-  class Delete(val app: AppName) : ApplicationsRegulationOperation() {}
-  class Modify(val app: AppName, val it: ApplicationRegulationOperation) : ApplicationsRegulationOperation() {}
-}
-
-sealed class UserProfileOperation {
-  class ModifyScreenRegulation(val it: ScreenRegulationOperation) : UserProfileOperation() {}
-  class ModifyApplicationsRegulations(val it: ApplicationsRegulationOperation) : UserProfileOperation() {}
-}
-
-sealed class Operation {
-  class ModifyMainUserProfile(val it: UserProfileOperation) : Operation() {}
-}
+// sealed class Operation {
+//   class ModifyMainUserProfile(val it: UserProfileOperation) : Operation() {}
+// }

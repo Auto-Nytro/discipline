@@ -5,9 +5,9 @@ import android.database.sqlite.SQLiteDatabase
 import com.example.app.database.*
 import com.example.app.*
 
-public class MainUserScreenCountdownRulesTable {
+public class MainUserScreenAlwaysRulesTable {
   companion object {
-    const val TABLE = "MainUserScreenCountdownRulesTable"
+    const val TABLE = "MainUserScreenAlwaysRulesTable"
 
     const val ID = "id"
     // const val ENABLED = "enabled"
@@ -35,7 +35,7 @@ public class MainUserScreenCountdownRulesTable {
   fun writeInsertRule(
     buffer: Buffer,
     id: UuidV4,
-    rule: CountdownRule,
+    rule: AlwaysRule,
   ) {
     buffer.write("""
       INSERT INTO $TABLE (
@@ -49,7 +49,7 @@ public class MainUserScreenCountdownRulesTable {
   fun insertRuleOrThrow(
     database: SQLiteDatabase,
     id: UuidV4,
-    rule: CountdownRule,
+    rule: AlwaysRule,
   ) {
     val buffer = Buffer()
     writeInsertRule(buffer, id, rule)
@@ -83,7 +83,7 @@ public class MainUserScreenCountdownRulesTable {
     """)
   }
 
-  fun readRuleOrThrow(cursor: Cursor): CountdownRule {
+  fun readRuleOrThrow(cursor: Cursor): AlwaysRule {
     // val rawEnabled = cursor.ourGetIntOrThrow(ENABLED_INDEX)
     val rawCountdownFrom = cursor.ourGetLongOrThrow(COUNTDOWN_FROM_INDEX)
     val rawCountdownDuration = cursor.ourGetLongOrThrow(COUNTDOWN_DURATION_INDEX)
@@ -92,7 +92,7 @@ public class MainUserScreenCountdownRulesTable {
     val countdownFrom = createInstantFromSqlOrThrow(rawCountdownFrom)
     val countdownDuration = createDurationFromSqlOrThrow(rawCountdownDuration)
 
-    return CountdownRule.construct(
+    return AlwaysRule.construct(
       // isEnabled = enabled, 
       countdown = Countdown.create(
         countdownFrom, 
@@ -104,7 +104,7 @@ public class MainUserScreenCountdownRulesTable {
   fun selectRuleOrThrow(
     database: SQLiteDatabase, 
     id: UuidV4,
-  ): CountdownRule? {
+  ): AlwaysRule? {
     val buffer = Buffer()
     writeSelectRule(buffer, id)
 
@@ -124,11 +124,11 @@ public class MainUserScreenCountdownRulesTable {
     """)
   }
 
-  fun selectAllRulesOrThrow(database: SQLiteDatabase): MutableMap<UuidV4, CountdownRule> {
+  fun selectAllRulesOrThrow(database: SQLiteDatabase): MutableMap<UuidV4, AlwaysRule> {
     val buffer = Buffer()
     writeSelectAllRules(buffer)
 
-    val rules = mutableMapOf<UuidV4, CountdownRule>()
+    val rules = mutableMapOf<UuidV4, AlwaysRule>()
     val cursor = database.ourQuery(buffer.string())
     while (cursor.moveToNext()) {
       val id = createUuidFromSqlOrThrow(cursor.ourGetStringOrThrow(ID_INDEX))

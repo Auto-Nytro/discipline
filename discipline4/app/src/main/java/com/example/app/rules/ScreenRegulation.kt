@@ -1,46 +1,36 @@
 package com.example.app
 
-public data class ApplicationRegulation private constructor(
+public data class ScreenRegulation private constructor(
   val alwaysRules: AlwaysRules,
   val timeRangeRules: TimeRangeRules,
-  val dailyTimeAllowanceRules: TimeAllowanceRules,
+  val dailyTimeAllowanceRules: TimeAllowanceRules
 ) {
   companion object {
     fun create(
       AlwaysRules: AlwaysRules,
       timeRangeRules: TimeRangeRules,
-      dailyTimeAllowanceRules: TimeAllowanceRules
-    ): ApplicationRegulation {
-      return ApplicationRegulation(
-        AlwaysRules, 
-        timeRangeRules, 
-        dailyTimeAllowanceRules,
+      timeAllowanceRules: TimeAllowanceRules
+    ): ScreenRegulation {
+      return ScreenRegulation(
+        AlwaysRules,
+        timeRangeRules,
+        timeAllowanceRules
       )
     }
     
-    fun createDefault(): ApplicationRegulation {
-      return ApplicationRegulation(
+    fun createDefault(): ScreenRegulation {
+      return ScreenRegulation(
         alwaysRules = AlwaysRules.createDefault(),
         timeRangeRules = TimeRangeRules.createDefault(),
         dailyTimeAllowanceRules = TimeAllowanceRules.createDefault()
       )
     }
   }
-  
-  fun isEnabled(now: Instant): Boolean {
-    return (
-      alwaysRules.someAreEnabled(now)
-      &&
-      timeRangeRules.someAreEnabled(now)
-      &&
-      dailyTimeAllowanceRules.someAreEnabled(now)
-    )
-  }
 
   fun isActive(
     nowAsInstant: Instant,
     nowAsTime: Time,
-    dailyUsedAllowance: Duration,
+    dailyUsedAllowance: Duration
   ): Boolean {
     return (
       alwaysRules.someAreActive(nowAsInstant) 
@@ -48,6 +38,16 @@ public data class ApplicationRegulation private constructor(
       timeRangeRules.someAreActive(nowAsInstant, nowAsTime) 
       ||
       dailyTimeAllowanceRules.someAreActive(nowAsInstant, dailyUsedAllowance)
+    )
+  }  
+
+  fun isEnabled(now: Instant): Boolean {
+    return (
+      alwaysRules.someAreEnabled(now)
+      ||
+      timeRangeRules.someAreEnabled(now)
+      ||
+      dailyTimeAllowanceRules.someAreEnabled(now)
     )
   }
 }

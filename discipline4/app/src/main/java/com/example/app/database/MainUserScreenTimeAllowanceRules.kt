@@ -42,8 +42,8 @@ public class MainUserScreenTimeAllowanceRules {
       INSERT INTO $TABLE (
         ${id.toSql()},
         ${rule.allowance.toSql()},
-        ${rule.lifetime.from.toSql()},
-        ${rule.lifetime.duration.toSql()},
+        ${rule.enabler.from.toSql()},
+        ${rule.enabler.duration.toSql()},
       );
     """)
   }

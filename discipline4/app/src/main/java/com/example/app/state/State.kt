@@ -1,13 +1,12 @@
 package com.example.app
 
-import com.example.app.*
 import kotlinx.coroutines.sync.Mutex
 
 public data class State(
   val monotonicClock: MonotonicClock,
   val mainUserProfile: UserProfile,
   val rulesStats: RulesStats,
-  val appRegulationsStats: ApplicationRegulationsStats,
+  val applicationRegulationsStats: ApplicationRegulationsStats,
 ) {
   companion object {
     val MONOTONIC_CLOCK_SYNCHRONIZATION_INTERVAL = Duration.fromMinutes(10).getOrThrow()
@@ -20,7 +19,7 @@ public data class State(
         monotonicClock,
         mainUserProfile,
         rulesStats = RulesStats(0, 100),
-        appRegulationsStats = ApplicationRegulationsStats(0, 30)
+        applicationRegulationsStats = ApplicationRegulationsStats(0, 30)
       )
     }
   }

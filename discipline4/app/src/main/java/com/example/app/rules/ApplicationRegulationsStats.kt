@@ -1,8 +1,8 @@
 package com.example.app
 
 public data class ApplicationRegulationsStats(
-  val applicationRegulationsNumber: Int,
-  val maximumApplicationRegulationsNumber: Int,
+  var applicationRegulationsNumber: Int,
+  var maximumApplicationRegulationsNumber: Int,
 ) {
   fun isFull(): Boolean {
     return applicationRegulationsNumber >= maximumApplicationRegulationsNumber

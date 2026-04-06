@@ -1,26 +1,23 @@
-use std::path::PathBuf;
-
 // mod ui_text;
 
 mod rules;
 
-pub mod launcher;
+mod launcher;
 
 mod serializaton;
 
-pub mod vaults;
-pub mod chronic;
-pub mod other;
-pub use other::textual_error::*;
-pub mod conditionals;
+mod vaults;
+mod chronic;
+mod other;
+mod conditionals;
 // pub mod rules;
 // pub mod regulation;
 // pub mod operating_system;
 // pub mod users;
 // pub mod daemon;
-pub mod database;
+mod database;
 pub mod x;
-pub mod protocol;
+mod protocol;
 // pub mod procedures;
 // pub mod state;
 // pub mod vs;
@@ -39,4 +36,4 @@ pub mod protocol;
 // }
 
 
-pub mod procedures;
+mod procedures;

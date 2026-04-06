@@ -173,6 +173,9 @@ impl RulesStats {
     }
   }
 
+  pub fn reached_maximum_allowed_always_rules(&self) -> bool {
+    todo!()
+  }
   pub fn update_after_always_rule_created(&mut self) {}
   pub fn update_after_always_rule_deleted(&mut self) {}
 

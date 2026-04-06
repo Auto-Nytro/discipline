@@ -44,8 +44,8 @@ public class MainUserScreenTimeRangeRulesTable {
     buffer.write("""
       INSERT INTO $TABLE (
         ${id.toSql()},
-        ${rule.lifetime.from.toSql()},
-        ${rule.lifetime.duration.toSql()},
+        ${rule.protection.from.toSql()},
+        ${rule.protection.duration.toSql()},
         ${rule.condition.fromTimestamp.toSql()},
         ${rule.condition.tillTimestamp.toSql()},
       );

@@ -17,6 +17,6 @@ import com.example.app.*
 // }
 
 
-class MainUserCountdownRulesUpdateSet {
+class MainUserAlwaysRulesUpdateSet {
   
 }

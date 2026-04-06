@@ -23,7 +23,7 @@ macro_rules! sql {
 
 use crate::IsTextualError;
 use crate::x::{AlwaysRule, CountdownAfterPleaConditionalDeactivatingState, CountdownConditionalActivateState, RuleEnabler, RuleEnablerType, UuidV4};
-use crate::x::procedures::always_rule::{AlwaysRuleContext, AlwaysRuleLocation};
+use crate::x::procedures::{AlwaysRuleContext, AlwaysRuleLocation};
 use crate::x::database::*;
 use crate::sql;
 
@@ -80,6 +80,7 @@ pub fn write_insert(
   //     [rule_id] ", "
   //     [location_id] ", "
   // )
+  // code.code("INSERT INTO").id(TABLE).code(" VALUES (").value(rule_id).comma()
   // code.write2("INSERT INTO ");
   // code.write2(TABLE);
   // code.write2(" VALUES (");
@@ -166,7 +167,7 @@ pub fn write_delete(
 
 pub fn delete_rule(
   database: &Database,
-  rule_context: &AlwaysRuleContext<'_>,
+  rule_location: &AlwaysRuleLocation,
   rule_id: &UuidV4,
   textual_error: &mut impl IsTextualError,
 ) -> Result<(), DeleteRule> {

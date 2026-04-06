@@ -1,29 +1,24 @@
 package com.example.app
 
-import com.example.app.*
-import androidx.room.Entity
-import androidx.room.Ignore
+import com.example.app.ScreenRegulation
 
-/**
- * Complete user profile with all regulations and stats
- */
 public data class UserProfile(
   val uptimeClock: UptimeClock,
   val vaultsStats: VaultsStats,
-  val screenRule: ScreenRule,
+  val screenRegulation: ScreenRegulation,
   val applicationRegulations: ApplicationRegulations,
 ) {
   companion object {
     // fun create(
     //   uptimeClock: UptimeClock,
     //   vaultsStats: VaultsStats
-    //   screenRule: ScreenRule,
+    //   screenRegulation: screenRegulation,
     //   ApplicationRegulations: ApplicationRegulations,
     // ): UserProfile {
     //   return UserProfile(
     //     uptimeClock = uptimeClock,
     //     vaultsStats = vaultsStats,
-    //     screenRule = screenRule,
+    //     screenRegulation = screenRegulation,
     //     ApplicationRegulations = ApplicationRegulations,
     //   )
     // }
@@ -32,25 +27,26 @@ public data class UserProfile(
       return UserProfile(
         uptimeClock = UptimeClock.create(now),
         vaultsStats = VaultsStats.create(maximumVaultsNumber = 10),
-        screenRule = ScreenRule.createDefault(),
+        screenRegulation = ScreenRegulation.createDefault(),
         applicationRegulations = ApplicationRegulations.createDefault(),
       )
     }
   }
   
-  fun getScreenRegulation(): ScreenRule {
-    return screenRule
+  fun isScreenRestricted(
+    nowAsInstant: Instant,
+    nowAsTime: Time,
+    dailyUsedAllowance: Duration,
+  ): Boolean {
+    return screenRegulation.isActive(nowAsInstant, nowAsTime, dailyUsedAllowance)
   }
 
-  fun getApplicationRegulations(): ApplicationRegulations {
-    return applicationRegulations
+  fun isApplicationRestricted(
+    app: AppName,
+    nowAsInstant: Instant,
+    nowAsTime: Time,
+    dailyUsedAllowance: Duration,
+  ): Boolean {
+    return applicationRegulations.regulations
   }
-
-  fun getUptimeClock(): UptimeClock {
-    return uptimeClock
-  }
-
-  fun getVaultsStats(): VaultsStats {
-    return vaultsStats
-  }  
 }

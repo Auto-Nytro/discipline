@@ -1,9 +1,7 @@
 package com.example.app
 
 import com.example.app.*
-import androidx.room.Entity
 
-@Entity
 @JvmInline
 public value class Duration private constructor(val milliseconds: Long) {
   companion object {
@@ -327,7 +325,7 @@ public value class Duration private constructor(val milliseconds: Long) {
     return milliseconds == 0L
   }
 
-  fun minusOrZero(rhs: Duration): Duration {
+  fun staturatingSub(rhs: Duration): Duration {
     return if (milliseconds > rhs.milliseconds) {
       Duration(milliseconds - rhs.milliseconds)
     } else {
@@ -335,7 +333,7 @@ public value class Duration private constructor(val milliseconds: Long) {
     }
   }
 
-  fun plusOrMax(rhs: Duration): Duration {
+  fun staturatingAdd(rhs: Duration): Duration {
     return if (milliseconds >= MAXIMUM_MILLISECONDS - rhs.milliseconds) {
       Duration(MAXIMUM_MILLISECONDS)
     } else {
