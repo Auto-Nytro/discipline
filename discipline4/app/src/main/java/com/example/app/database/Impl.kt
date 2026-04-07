@@ -94,8 +94,37 @@ class TimeRangeSchema(
   val till: TimeSchema,
 )
 
-object TtimeRangeWrite : Write<TimeRange, TimeRangeSchema> {
+object TimeRangeWrite : Write<TimeRange, TimeRangeSchema> {
+  override fun write(value: TimeRange, schema: TimeRangeSchema, writer: Writer): Unit {
+    writer.write(schema.from, value.from, TimeSchema)
+    writer.write(schema.till, value.till, TimeSchema)
+  }
+}
 
+object TimeRangeRead : Write<TimeRange, TimeRangeSchema> {
+  override fun write(schema: TimeRangeSchema, reader: Reader): TimeRange {
+    return TimeRange.fromTimes(
+      reader.readOrThrow(schema.from, TimeRead),
+      reader.readOrThrow(schema.till, TimeRead),
+    )
+  }
+}
+
+class UptimeClockSchema(
+  // TODO
+)
+
+object UptimeClockWrite : Write<UptimeClock, UptimeClockSchema> {
+  override fun write(schema: UptimeClockSchema, value: UptimeClock, writer: Writer): Unit {
+    // TODO
+
+  }
+}
+
+object UptimeClockRead : Read<UptimeClock, UptimeClockSchema> {
+  override fun readOrThrow(schema: UptimeClockSchema, reader: Reader): UptimeClock {
+    throw TextualError.create("TODO")
+  }
 }
 
 class MonotonicClockSchema(
@@ -303,5 +332,82 @@ object RuleEnablerWrite : Write<RuleEnabler, RuleEnablerSchema> {
         )
       }
     }
+  }
+}
+
+object RuleEnablerRead : Read<RuleEnabler, RuleEnablerSchema> {
+  override fun readOrThrow(schema: RuleEnablerSchema, reader: Reader): RuleEnabler {
+    when (reader.readOrThrow(schema.variant, RuleEnablerVariantRead)) {
+      RuleEnabler.Variant.Countdown -> {
+        RuleEnabler.Countdown(
+          reader.readOrThrow(schema.countdownVariant, CountdownConditionalRead)
+        )
+      }
+      RuleEnabler.Variant.CountdownAfterPlea -> {
+        RuleEnabler.Countdown(
+          reader.readOrThrow(schema.countdownAfterPleaVariant, CountdownAfterPleaConditionalRead)
+        )
+      }
+    }
+  }
+}
+
+class AlwaysRuleSchema(
+  val enabler: RuleEnablerSchema,
+)
+
+object AlwaysRuleWrite : Write<AlwaysRule, AlwaysRuleSchema> {
+  override fun write(schema: AlwaysRuleSchema, value: AlwaysRule, writer: Writer): Unit {
+    writer.write(schema.enabler, value.enabler, RuleEnablerWrite)
+  }
+}
+
+object AlwaysRuleRead : Write<AlwaysRule, AlwaysRuleSchema> {
+  override fun readOrThrow(schema: AlwaysRuleSchema, reader: Reader): AlwaysRule {
+    return AlwaysRule.construct(
+      reader.readOrThrow(schema.enabler, RuleEnablerRead)
+    )
+  }
+}
+
+class TimeRangeRuleSchema(
+  val enabler: RuleEnablerSchema,
+  val condition: TimeRangeSchema,
+)
+
+object TimeRangeRuleWrite : Write<TimeRangeRule, TimeRangeRuleSchema> {
+  override fun write(schema: TimeRangeRuleSchema, value: TimeRangeRule, writer: Writer): Unit {
+    writer.write(schema.enabler, value.enabler, RuleEnablerWrite)
+    writer.write(schema.condition, value.condition, TimeRangeWrite)
+  }
+}
+
+object TimeRangeRuleRead : Write<TimeRangeRule, TimeRangeRuleSchema> {
+  override fun readOrThrow(schema: TimeRangeRuleSchema, reader: Reader): TimeRangeRule {
+    return TimeRangeRule.construct(
+      reader.readOrThrow(schema.enabler, RuleEnablerRead),
+      reader.readOrThrow(schema.condition, TimeRangeRead),
+    )
+  }
+}
+
+class TimeAllowanceRuleSchema(
+  val enabler: RuleEnablerSchema,
+  val totalAllowance: DurationSchema,
+)
+
+object TimeAllowanceRuleWrite : Write<TimeAllowanceRule, TimeAllowanceRuleSchema> {
+  override fun write(schema: TimeAllowanceRuleSchema, value: TimeAllowanceRule, writer: Writer): Unit {
+    writer.write(schema.enabler, value.enabler, RuleEnablerWrite)
+    writer.write(schema.totalAllowance, value.totalAllowance, DurationWrite)
+  }
+}
+
+object TimeAllowanceRuleRead : Write<TimeAllowanceRule, TimeAllowanceRuleSchema> {
+  override fun readOrThrow(schema: TimeAllowanceRuleSchema, reader: Reader): TimeAllowanceRule {
+    return TimeAllowanceRule.construct(
+      reader.readOrThrow(schema.enabler, RuleEnablerRead),
+      reader.readOrThrow(schema.totalAllowance, DurtaionRead),
+    )
   }
 }

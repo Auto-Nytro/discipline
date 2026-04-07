@@ -1,5 +1,8 @@
 package com.example.app
 
+import androidx.room.Entity
+
+@Entity
 public data class AlwaysRule private constructor(
   val enabler: RuleEnabler
 ) {
