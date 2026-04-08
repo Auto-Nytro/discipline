@@ -8,6 +8,9 @@ public data class TimeRangeRule private constructor(
     fun create(enabler: RuleEnabler, timeRange: TimeRange): TimeRangeRule {
       return TimeRangeRule(enabler, timeRange)
     }
+    fun construct(enabler: RuleEnabler, timeRange: TimeRange): TimeRangeRule {
+      return TimeRangeRule(enabler, timeRange)
+    }
   }
   
   fun isEnabled(now: Instant): Boolean {

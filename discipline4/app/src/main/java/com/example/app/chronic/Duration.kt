@@ -325,7 +325,7 @@ public value class Duration private constructor(val milliseconds: Long) {
     return milliseconds == 0L
   }
 
-  fun staturatingSub(rhs: Duration): Duration {
+  fun saturatingSub(rhs: Duration): Duration {
     return if (milliseconds > rhs.milliseconds) {
       Duration(milliseconds - rhs.milliseconds)
     } else {
@@ -333,7 +333,7 @@ public value class Duration private constructor(val milliseconds: Long) {
     }
   }
 
-  fun staturatingAdd(rhs: Duration): Duration {
+  fun saturatingAdd(rhs: Duration): Duration {
     return if (milliseconds >= MAXIMUM_MILLISECONDS - rhs.milliseconds) {
       Duration(MAXIMUM_MILLISECONDS)
     } else {

@@ -12,6 +12,7 @@ public data class Countdown(
 
   companion object {
     fun create(from: Instant, duration: Duration): Countdown = Countdown(from, duration)
+    fun construct(from: Instant, duration: Duration): Countdown = Countdown(from, duration)
   }
   
   fun getFrom(): Instant {

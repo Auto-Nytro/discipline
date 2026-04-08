@@ -73,6 +73,13 @@ public data class TimeAllowanceRule(
         enabler = enabler,
       )
     }
+
+    fun construct(
+      enabler: RuleEnabler,
+      allowance: Duration,
+    ): TimeAllowanceRule {
+      return TimeAllowanceRule(enabler = enabler, allowance = allowance)
+    }
   }
   
   fun getTotalAllowance(): Duration {
@@ -80,7 +87,7 @@ public data class TimeAllowanceRule(
   }
   
   fun getRemainingAllowance(elapsedTime: Duration): Duration {
-    return allowance.staturatingSub(elapsedTime)
+    return allowance.saturatingSub(elapsedTime)
   }
   
   fun isAllowanceUp(elapsedTime: Duration): Boolean {

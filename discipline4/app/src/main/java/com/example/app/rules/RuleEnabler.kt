@@ -37,5 +37,23 @@ public sealed class RuleEnabler {
   enum class Variant {
     Countdown,
     CountdownAfterPlea,
+
+    companion object {
+      fun fromNumberOrThrow(number: Int): Variant {
+        return when (number) {
+          0 -> {
+            Variant.Countdown
+          }
+          1 -> {
+            Variant.CountdownAfterPlea
+          }
+          else -> {
+            throw TextualError
+              .create("Creating RuleEnablerVariant from number")
+              .addMessage("Expected 0 (for Countdown) or 1 (for CountdownAfterPlea), but found $number")
+          }
+        }
+      }
+    }
   }
 }
