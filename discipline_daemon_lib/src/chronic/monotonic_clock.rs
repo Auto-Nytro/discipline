@@ -3,10 +3,10 @@ use serde::{Deserialize, Serialize};
 use crate::x::{DateTime, Duration};
 
 pub struct MonotonicClock {
-  total_elapsed_duration: Duration,
-  previous_synchronization_realtime: Instant,
-  previous_synchronization_boottime: Instant,
-  maximum_synchronization_interval: Duration,
+  pub total_elapsed_duration: Duration,
+  pub previous_synchronization_realtime: Instant,
+  pub previous_synchronization_boottime: Instant,
+  pub maximum_synchronization_interval: Duration,
 }
 
 impl MonotonicClock {

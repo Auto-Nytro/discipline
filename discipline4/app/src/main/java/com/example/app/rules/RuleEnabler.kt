@@ -55,5 +55,9 @@ public sealed class RuleEnabler {
         }
       }
     }
+
+    fun toNumber(): Int {
+      TODO()
+    }
   }
 }

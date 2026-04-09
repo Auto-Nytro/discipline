@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use crate::x::CountdownAfterPleaConditional;
+use crate::x::{CountdownAfterPleaConditional, IsTextualError};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct VaultName {
@@ -68,10 +68,25 @@ pub enum VaultProtector {
   CountdownAfterPlea(CountdownAfterPleaConditional)
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum VaultProtectorVariant {
+  CountdownAfterPlea,
+}
+
+impl VaultProtectorVariant {
+  pub fn from_number(number: u8, textual_error: &mut impl IsTextualError) -> Result<Self, ()> {
+    todo!()
+  }
+
+  pub fn to_number(self) -> u8 {
+    todo!()
+  }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Vault {
-  name: VaultName,
-  protector: VaultProtector,
+  pub name: VaultName,
+  pub protector: VaultProtector,
 }
 
 // TODO: Rename to CommonInfo or Singleton

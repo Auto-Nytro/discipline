@@ -1,7 +1,7 @@
 package com.example.app
 
 public data class AlwaysRules(
-  private val rules: MutableMap<UuidV4, AlwaysRule>,
+  private val rules: MutableMap<Id, AlwaysRule>,
 ) {
   companion object {
     fun createDefault(): AlwaysRules {
@@ -9,19 +9,19 @@ public data class AlwaysRules(
     }
   }
 
-  fun has(id: UuidV4): Boolean {
+  fun has(id: Id): Boolean {
     return rules.containsKey(id)
   }
 
-  fun get(id: UuidV4): AlwaysRule? {
+  fun get(id: Id): AlwaysRule? {
     return rules.get(id)
   }
 
-  fun add(id: UuidV4, rule: AlwaysRule) {
+  fun add(id: Id, rule: AlwaysRule) {
     rules.set(id, rule)
   }
 
-  fun remove(id: UuidV4) {
+  fun remove(id: Id) {
     rules.remove(id)
   }
 
@@ -32,4 +32,7 @@ public data class AlwaysRules(
   fun someAreActive(now: Instant): Boolean {
     return rules.values.any { rule -> rule.isActive(now) }
   }
+
+  @JvmInline
+  public value class Id(val id: Long)
 }

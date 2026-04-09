@@ -1,86 +1,86 @@
-package com.example.app
+// package com.example.app
 
-import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
-import com.example.app.database.*
-import com.example.app.*
+// import android.database.Cursor
+// import android.database.sqlite.SQLiteDatabase
+// import com.example.app.database.*
+// import com.example.app.*
 
-class AlwaysRulesTable {
-  companion object {
-    const val TABLE = "AlwaysRules"
+// class AlwaysRulesTable {
+//   companion object {
+//     const val TABLE = "AlwaysRules"
 
-    const val ID = "id"
-    const val ENABLER_TYPE = "enabler_type"
-    const val ENABLED_DATA_1 = "enabler_data_1"
-    const val ENABLED_DATA_2 = "enabler_data_2"
-    const val ENABLED_DATA_3 = "enabler_data_3"
+//     const val ID = "id"
+//     const val ENABLER_TYPE = "enabler_type"
+//     const val ENABLED_DATA_1 = "enabler_data_1"
+//     const val ENABLED_DATA_2 = "enabler_data_2"
+//     const val ENABLED_DATA_3 = "enabler_data_3"
 
-    const val ENABLER_COUNTDOWN_DURATION = ENABLED_DATA_1
-    const val ENABLER_COUNTDOWN_COUNTDOWN_FROM = ENABLED_DATA_2
-    const val ENABLER_COUNTDOWN_COUNTDOWN_DURATION = ENABLED_DATA_3
+//     const val ENABLER_COUNTDOWN_DURATION = ENABLED_DATA_1
+//     const val ENABLER_COUNTDOWN_COUNTDOWN_FROM = ENABLED_DATA_2
+//     const val ENABLER_COUNTDOWN_COUNTDOWN_DURATION = ENABLED_DATA_3
 
-    const val ENABLER_COUNTDOWN_AFTER_PLEA_DURATION = ENABLED_DATA_1
-    const val ENABLER_COUNTDOWN_AFTER_PLEA_COUNTDOWN_FROM = ENABLED_DATA_2
-    const val ENABLER_COUNTDOWN_AFTER_PLEA_COUNTDOWN_DURATION = ENABLED_DATA_3
+//     const val ENABLER_COUNTDOWN_AFTER_PLEA_DURATION = ENABLED_DATA_1
+//     const val ENABLER_COUNTDOWN_AFTER_PLEA_COUNTDOWN_FROM = ENABLED_DATA_2
+//     const val ENABLER_COUNTDOWN_AFTER_PLEA_COUNTDOWN_DURATION = ENABLED_DATA_3
 
-    const val ID_INDEX = 0
-    const val ENABLER_TYPE_INDEX = 1
-    const val ENABLED_DATA_1_INDEX = 2
-    const val ENABLED_DATA_2_INDEX = 3
-    const val ENABLED_DATA_3_INDEX = 4
+//     const val ID_INDEX = 0
+//     const val ENABLER_TYPE_INDEX = 1
+//     const val ENABLED_DATA_1_INDEX = 2
+//     const val ENABLED_DATA_2_INDEX = 3
+//     const val ENABLED_DATA_3_INDEX = 4
 
-    const val ENABLER_COUNTDOWN_DURATION_INDEX = ENABLED_DATA_1_INDEX
-    const val ENABLER_COUNTDOWN_COUNTDOWN_FROM_INDEX = ENABLED_DATA_2_INDEX
-    const val ENABLER_COUNTDOWN_COUNTDOWN_DURATION_INDEX = ENABLED_DATA_3_INDEX
+//     const val ENABLER_COUNTDOWN_DURATION_INDEX = ENABLED_DATA_1_INDEX
+//     const val ENABLER_COUNTDOWN_COUNTDOWN_FROM_INDEX = ENABLED_DATA_2_INDEX
+//     const val ENABLER_COUNTDOWN_COUNTDOWN_DURATION_INDEX = ENABLED_DATA_3_INDEX
 
-    const val ENABLER_COUNTDOWN_AFTER_PLEA_DURATION_INDEX = ENABLED_DATA_1_INDEX
-    const val ENABLER_COUNTDOWN_AFTER_PLEA_COUNTDOWN_FROM_INDEX = ENABLED_DATA_2_INDEX
-    const val ENABLER_COUNTDOWN_AFTER_PLEA_COUNTDOWN_DURATION_INDEX = ENABLED_DATA_3_INDEX
+//     const val ENABLER_COUNTDOWN_AFTER_PLEA_DURATION_INDEX = ENABLED_DATA_1_INDEX
+//     const val ENABLER_COUNTDOWN_AFTER_PLEA_COUNTDOWN_FROM_INDEX = ENABLED_DATA_2_INDEX
+//     const val ENABLER_COUNTDOWN_AFTER_PLEA_COUNTDOWN_DURATION_INDEX = ENABLED_DATA_3_INDEX
 
-    val namedSchema =
-  }
+//     val namedSchema =
+//   }
 
-  fun writeCreateTable(code: Buffer) {
-    code.write(""" 
-      CREATE TABLE IF NOT EXISTS $TABLE (
-        $ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        $ENABLER_TYPE INTEGER NOT NULL,
-        $ENABLER_DATA_1 INTEGER NOT NULL,
-        $ENABLER_DATA_2 INTEGER,
-        $ENABLER_DATA_3 INTEGER
-      ) STRICT;
-    """)
-  }
+//   fun writeCreateTable(code: Buffer) {
+//     code.write(""" 
+//       CREATE TABLE IF NOT EXISTS $TABLE (
+//         $ID INTEGER PRIMARY KEY AUTOINCREMENT,
+//         $ENABLER_TYPE INTEGER NOT NULL,
+//         $ENABLER_DATA_1 INTEGER NOT NULL,
+//         $ENABLER_DATA_2 INTEGER,
+//         $ENABLER_DATA_3 INTEGER
+//       ) STRICT;
+//     """)
+//   }
 
-  fun writeInsertRule(code: Buffer, rule: AlwaysRule) {
-    code.write("INSERT INTO $TABLE VALUES (")
-    rule.enabler.let {
-      when (it) {
-        RuleEnabler.Countdown -> it.it.let {
+//   fun writeInsertRule(code: Buffer, rule: AlwaysRule) {
+//     code.write("INSERT INTO $TABLE VALUES (")
+//     rule.enabler.let {
+//       when (it) {
+//         RuleEnabler.Countdown -> it.it.let {
           
-        }
-      }
-    }
-    when (rule.enabler) {
-      is RuleEnabler.Countdown -> {
-        writeDuration(rule.enabler.it.duration)
-        code.write(", ")
-        code.write(rule.enabler.it.duration.toSql())
-        code.write(", ")
-        when rule.enabler.it.countdown {
-          is null -> {
-            code.write("NULL")
-            code.write(", ")
-            code.write("NULL")
-          }
-          else -> {
-            code.write(rule.enabler.it.countdown.from.toSql())
-            code.write(", ")
-            code.write(rule.enabler.it.countdown.duration.toSql())
-          }
-        }
-      }
-      is RuleEnabler
-    }
-  }
-}
+//         }
+//       }
+//     }
+//     when (rule.enabler) {
+//       is RuleEnabler.Countdown -> {
+//         writeDuration(rule.enabler.it.duration)
+//         code.write(", ")
+//         code.write(rule.enabler.it.duration.toSql())
+//         code.write(", ")
+//         when rule.enabler.it.countdown {
+//           is null -> {
+//             code.write("NULL")
+//             code.write(", ")
+//             code.write("NULL")
+//           }
+//           else -> {
+//             code.write(rule.enabler.it.countdown.from.toSql())
+//             code.write(", ")
+//             code.write(rule.enabler.it.countdown.duration.toSql())
+//           }
+//         }
+//       }
+//       is RuleEnabler
+//     }
+//   }
+// }

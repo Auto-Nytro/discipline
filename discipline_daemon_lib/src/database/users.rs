@@ -1,6 +1,7 @@
 use crate::x::{Database, TextualError, ToTextualError, UserName, UsersSingleton, UuidV4, operating_system};
 use crate::x::database::*;
 
+
 impl ScalarWrite for UserName {
   fn write(value: &Self, writer: &mut ScalarValueWriteDestination) {
     writer.write_scalar_value(value.as_string());

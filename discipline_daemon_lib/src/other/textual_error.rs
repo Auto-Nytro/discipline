@@ -287,16 +287,16 @@ pub trait IsTextualError {
 
 impl<'a> IsTextualError for OptionalTextualErrorContext<'a> {
   fn add_attachement_debug(&mut self, name: impl Into<String>, value: impl Debug) {
-      
+    todo!()
   }
   fn add_attachement_display(&mut self, name: impl Into<String>, value: impl Display) {
-      
+    todo!()
   }
   fn add_message(&mut self, new_error_message: impl Into<String>) {
-      
+    todo!()
   }
   fn change_context(&mut self, new_context_action: impl Into<String>) {
-      
+    todo!()
   }
   fn new(action: impl Into<String>) -> Self {
     todo!()
@@ -315,5 +315,48 @@ impl<'a> IsTextualError for OptionalTextualErrorContext<'a> {
   }
   fn with_message(self, message: impl Into<String>) -> Self {
     todo!()
+  }
+}
+
+fn do_something_1(textual_error: &mut impl IsTextualError) -> Result<(), ()> {
+  let an_error_occured = true;
+  if an_error_occured {
+    textual_error.change_context("Doing something");
+    textual_error.add_message("We were doing something, but something went wrong");
+    textual_error.add_attachement_display("Some attachement", "A tiny, 10-cm smol, 8yo, endearing automata boy with a back fan zoomed by just now");
+    Err(())
+  } else {
+    Ok(())
+  }
+}
+
+enum Error {
+  Error1,
+  Error2,
+  Error3,
+}
+
+fn do_something_2(textual_error: &mut impl IsTextualError) -> Result<(), Error> {
+  let an_error_occured = true;
+  if an_error_occured {
+    textual_error.change_context("Doing something");
+    textual_error.add_message("We were doing something, but something went wrong");
+    textual_error.add_attachement_display("Some attachement", "A tiny, 10-cm smol, 8yo, endearing automata boy with a back fan zoomed by just now");
+    Err(Error::Error1)
+  } else {
+    Ok(())
+  }
+}
+
+fn do_something_3(textual_error: &mut impl IsTextualError) -> Result<(), ()> {
+  let an_error_occured = true;
+  if an_error_occured {
+    return Err(
+      TextualError::new("Doing something")
+        .add_message("We were doing something, but something went wrong")
+        .add_attachement_display("Some attachement", "A tiny, 10-cm smol, 8yo, endearing automata boy with a back fan zoomed by just now")
+    )
+  } else {
+    Ok(())
   }
 }

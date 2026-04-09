@@ -1,15 +1,17 @@
 package com.example.app
 
+import com.example.app.database.RuleLocationsTable
+
 sealed class CountdownConditionalLocation {
-  class MainUserProfileScreenRegulationAlwaysRuleEnabler(val ruleId: UuidV4) : CountdownConditionalLocation() {}
-  class MainUserProfileScreenRegulationTimeRangeRuleEnabler(val ruleId: UuidV4) : CountdownConditionalLocation() {}
-  class MainUserProfileScreenRegulationDailyTimeAllowanceRuleEnabler(val ruleId: UuidV4) : CountdownConditionalLocation() {}
+  class MainUserProfileScreenRegulationAlwaysRuleEnabler(val ruleId: AlwaysRules.Id, val locationId: RuleLocationsTable.Id) : CountdownConditionalLocation() {}
+  class MainUserProfileScreenRegulationTimeRangeRuleEnabler(val ruleId: TimeRangeRules.Id, val locationId: RuleLocationsTable.Id) : CountdownConditionalLocation() {}
+  class MainUserProfileScreenRegulationDailyTimeAllowanceRuleEnabler(val ruleId: TimeAllowanceRules.Id, val locationId: RuleLocationsTable.Id) : CountdownConditionalLocation() {}
 
-  class MainUserProfileApplicationRegulationAlwaysRuleEnabler(val ruleId: UuidV4) : CountdownConditionalLocation() {}
-  class MainUserProfileApplicationRegulationTimeRangeRuleEnabler(val ruleId: UuidV4) : CountdownConditionalLocation() {}
-  class MainUserProfileApplicationRegulationDailyTimeAllowanceRuleEnabler(val ruleId: UuidV4) : CountdownConditionalLocation() {}
+  class MainUserProfileApplicationRegulationAlwaysRuleEnabler(val ruleId: AlwaysRules.Id, val locationId: RuleLocationsTable.Id) : CountdownConditionalLocation() {}
+  class MainUserProfileApplicationRegulationTimeRangeRuleEnabler(val ruleId: TimeRangeRules.Id, val locationId: RuleLocationsTable.Id) : CountdownConditionalLocation() {}
+  class MainUserProfileApplicationRegulationDailyTimeAllowanceRuleEnabler(val ruleId: TimeAllowanceRules.Id, val locationId: RuleLocationsTable.Id) : CountdownConditionalLocation() {}
 
-  class MainUserProfileVaultProtector(val vaultId: UuidV4) : CountdownConditionalLocation() {}
+  class MainUserProfileVaultProtector(val vaultId: UuidV4, val locationId: RuleLocationsTable.Id) : CountdownConditionalLocation() {}
 }
 
 sealed class CountdownConditionalLocateError {

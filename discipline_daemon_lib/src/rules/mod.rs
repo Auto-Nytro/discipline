@@ -1,6 +1,22 @@
 use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
-use crate::x::{CountdownAfterPleaConditional, CountdownConditional, Duration, Instant, Time, TimeRange, UuidV4};
+use crate::x::{CountdownAfterPleaConditional, CountdownConditional, Duration, Instant, IsTextualError, Time, TimeRange, UuidV4};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RuleEnablerVariant {
+  Countdown,
+  CountdownAfterPlea,
+}
+
+impl RuleEnablerVariant {
+  pub fn from_number(number: u8, textual_error: &mut impl IsTextualError) -> Result<Self, ()> {
+    todo!()
+  }
+
+  pub fn to_number(self) -> u8 {
+    todo!()
+  }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RuleEnabler {

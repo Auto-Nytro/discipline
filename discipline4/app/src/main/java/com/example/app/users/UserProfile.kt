@@ -41,12 +41,12 @@ public data class UserProfile(
     return screenRegulation.isActive(nowAsInstant, nowAsTime, dailyUsedAllowance)
   }
 
-  fun isApplicationRestricted(
-    app: ApplicationName,
-    nowAsInstant: Instant,
-    nowAsTime: Time,
-    dailyUsedAllowance: Duration,
-  ): Boolean {
-    return applicationRegulations.regulations
-  }
+  // fun isApplicationRestricted(
+  //   app: ApplicationName,
+  //   nowAsInstant: Instant,
+  //   nowAsTime: Time,
+  //   dailyUsedAllowance: Duration,
+  // ): Boolean {
+  //   return applicationRegulations.regulations
+  // }
 }

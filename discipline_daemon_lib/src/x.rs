@@ -21,6 +21,7 @@ pub use crate::chronic::weekday;
 pub use crate::chronic::weekday_set::WeekdaySet;
 pub use crate::chronic::weekday_set;
 
+pub use crate::other::option::OptionVariant;
 
 pub use crate::database;
 pub use crate::database::Database;
@@ -32,3 +33,5 @@ pub use crate::conditionals::*;
 pub use crate::rules::*;
 
 pub use crate::launcher;
+
+pub use crate::vaults::*;

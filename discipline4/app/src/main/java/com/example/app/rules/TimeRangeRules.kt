@@ -1,7 +1,7 @@
 package com.example.app
 
 public data class TimeRangeRules(
-  private val rules: MutableMap<UuidV4, TimeRangeRule>,
+  private val rules: MutableMap<Id, TimeRangeRule>,
 ) {
   companion object {
     fun createDefault(): TimeRangeRules {
@@ -9,19 +9,19 @@ public data class TimeRangeRules(
     }
   }
 
-  fun has(id: UuidV4): Boolean {
+  fun has(id: Id): Boolean {
     return rules.containsKey(id)
   }
 
-  fun get(id: UuidV4): TimeRangeRule? {
+  fun get(id: Id): TimeRangeRule? {
     return rules.get(id)
   }
 
-  fun add(id: UuidV4, rule: TimeRangeRule) {
+  fun add(id: Id, rule: TimeRangeRule) {
     rules.set(id, rule)
   }
 
-  fun remove(id: UuidV4) {
+  fun remove(id: Id) {
     rules.remove(id)
   }
 
@@ -32,4 +32,7 @@ public data class TimeRangeRules(
   fun someAreActive(instant: Instant, time: Time): Boolean {
     return rules.values.any { rule -> rule.isActive(instant, time) }
   }
+
+  @JvmInline
+  public value class Id(val id: Long)
 }
