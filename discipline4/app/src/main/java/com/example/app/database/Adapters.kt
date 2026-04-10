@@ -333,13 +333,20 @@ class CountdownConditionalDbAdapter {
   ) {
     when (location) {
       is CountdownConditionalLocation.MainUserProfileScreenRegulationAlwaysRuleEnabler -> {
+        val names = AlwaysRulesTable.names.enabler.countdown
         val buffer = Buffer()
-        buffer.write("UPDATE ${AlwaysRulesTable.TABLE} SET ")
-        buffer.reactivateCountdownConditional(
-          countdownFromColumn,
-          countdownDurationColumn, 
-          reactivateState,
-        )
+        buffer.apply {
+          code("UPDATE ${AlwaysRulesTable.TABLE} SET ")
+          reactivateCountdownConditional(names, reactivateState)
+          code(" WHERE ${AlwaysRule} = ")
+          alwaysRuleId(location.ruleId)
+          code(";")
+        }
+
+        val namedWriteDestination = NamedWriteDestination()
+        namedWriteDestination.initialize(buffer)
+        AlwaysRulesTable.indexes.enabler.countdown.reactivate(namedWriteDestination, reactivateState)
+
       }
       is CountdownConditionalLocation.MainUserProfileScreenRegulationTimeRangeRuleEnabler -> {
 
