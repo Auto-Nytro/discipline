@@ -55,8 +55,8 @@ sealed class TimeRangeRuleLocateError {
 }
 
 sealed class TimeRangeRuleLocation {
-  class MainUserProfileScreenRegulation(val locationId: LocationId): TimeRangeRuleLocation() {}
-  class MainUserProfileApplicationRegulation(val locationId: LocationId, val applicationName: ApplicationName): TimeRangeRuleLocation() {}
+  class MainUserProfileScreenRegulation(): TimeRangeRuleLocation() {}
+  class MainUserProfileApplicationRegulation(val regulationId: ApplicationRegulationId, val applicationName: ApplicationName): TimeRangeRuleLocation() {}
 }
 
 sealed class TimeAllowanceRuleLocateError {
@@ -64,8 +64,8 @@ sealed class TimeAllowanceRuleLocateError {
 }
 
 sealed class TimeAllowanceRuleLocation {
-  class MainUserProfileScreenRegulationDailyTimeAllowance(val locationId: LocationId) : TimeAllowanceRuleLocation() {}
-  class MainUserProfileApplicationRegulationDailyTimeAllowance(val locationId: LocationId) : TimeAllowanceRuleLocation() {}
+  class MainUserProfileScreenRegulationDailyTimeAllowance(val regulationId: ApplicationRegulationId) : TimeAllowanceRuleLocation() {}
+  class MainUserProfileApplicationRegulationDailyTimeAllowance(val regulationId: ApplicationRegulationId) : TimeAllowanceRuleLocation() {}
 }
 
 sealed class ApplicationRegulationLocateError() {

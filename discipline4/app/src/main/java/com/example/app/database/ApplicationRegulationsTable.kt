@@ -11,21 +11,18 @@ object ApplicationRegulationsTable {
   fun writeCreateTable(buffer: Buffer) {
     buffer.code("""
       CREATE TABLE IF NOT EXISTS $TABLE (
-        $ID PRIMARY KEY AUTOINCREMENT,
+        $ID INTEGER PRIMARY KEY,
         $APPLICATION_NAME TEXT NOT NULL
-      ) STRICT, WITHOUT ROWID;
+      ) STRICT;
     """)
   }
 
   fun writeInsert(
     buffer: Buffer,
-    id: ApplicationRegulationId,
     applicationName: ApplicationName,
   ) {
     buffer.apply {
-      code("INSERT INTO $TABLE VALUES (")
-      applicationRegulationId(id)
-      comma()
+      code("INSERT INTO $TABLE VALUES (NULL, ")
       applicationName(applicationName)
       code(");")
     }
@@ -33,5 +30,30 @@ object ApplicationRegulationsTable {
 
   fun insertOrThrow(
     database: DatabaseConnection,
-  )
+    applicationName: ApplicationName,
+  ): ApplicationRegulationId {
+    val buffer = Buffer()
+    writeInsert(buffer, applicationName)
+    return ApplicationRegulationId(database.insertOrThrow(buffer.string()))
+  }
+
+  fun writeDelete(
+    buffer: Buffer,
+    applicationName: ApplicationName,
+  ) {
+    buffer.apply {
+      code("DELETE FROM $TABLE WHERE $APPLICATION_NAME = ")
+      applicationName(applicationName)
+      code(";")
+    }
+  }
+
+  fun deleteOrThrow(
+    database: DatabaseConnection,
+    applicationName: ApplicationName,
+  ) {
+    val buffer = Buffer()
+    writeDelete(buffer, applicationName)
+    database.execSqlOrThrow(buffer.string())
+  }
 }

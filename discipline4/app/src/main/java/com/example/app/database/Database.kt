@@ -5,35 +5,64 @@ import com.example.app.*
 class Database(
   val connection: DatabaseConnection,
 ) {
-  fun createAlwaysRule(location: AlwaysRuleLocation, ruleId: AlwaysRuleId, rule: AlwaysRule) {
-    AlwaysRuleDbAdapter.createOrThrow(connection, location, ruleId, rule)
+  private fun <R> withTransaction(callback: (connection: DatabaseConnection) -> R): R {
+    connection.connection.beginTransaction()
+    val returnValue = callback(connection)
+    connection.connection.setTransactionSuccessful()
+    return returnValue
   }
+
+  fun createAlwaysRule(location: AlwaysRuleLocation, rule: AlwaysRule): AlwaysRuleId {
+    return withTransaction {
+      AlwaysRuleDbAdapter.createOrThrow(connection, location, rule)
+    }
+  }
+
   fun deleteAlwaysRule(location: AlwaysRuleLocation, ruleId: AlwaysRuleId) {
-    AlwaysRuleDbAdapter.deleteOrThrow(connection, location, ruleId)
+    withTransaction {
+      AlwaysRuleDbAdapter.deleteOrThrow(connection, location, ruleId)
+    }
   }
 
-  fun createTimeRangeRule(location: TimeRangeRuleLocation, ruleId: TimeRangeRuleId, rule: TimeRangeRule) {
-    TimeRangeRuleDbAdapter.createOrThrow(connection, location, ruleId, rule)
+  fun createTimeRangeRule(location: TimeRangeRuleLocation, rule: TimeRangeRule): TimeRangeRuleId {
+    return withTransaction {
+      TimeRangeRuleDbAdapter.createOrThrow(connection, location, rule)
+    }
   }
+
   fun deleteTimeRangeRule(location: TimeRangeRuleLocation, ruleId: TimeRangeRuleId) {
-    TimeRangeRuleDbAdapter.deleteOrThrow(connection, location, ruleId)
+    withTransaction {
+      TimeRangeRuleDbAdapter.deleteOrThrow(connection, location, ruleId)
+    }
   }
 
-  fun createTimeAllowanceRule(location: TimeAllowanceRuleLocation, ruleId: TimeAllowanceRuleId, rule: TimeAllowanceRule) {
-    TimeAllowanceRuleDbAdapter.createOrThrow(connection, location, ruleId, rule)
+  fun createTimeAllowanceRule(location: TimeAllowanceRuleLocation, rule: TimeAllowanceRule): TimeAllowanceRuleId {
+    return withTransaction {
+      TimeAllowanceRuleDbAdapter.createOrThrow(connection, location, rule)
+    }
   }
+
   fun deleteTimeAllowanceRule(location: TimeAllowanceRuleLocation, ruleId: TimeAllowanceRuleId) {
-    TimeAllowanceRuleDbAdapter.deleteOrThrow(connection, location, ruleId)
+    withTransaction {
+      TimeAllowanceRuleDbAdapter.deleteOrThrow(connection, location, ruleId)
+    }
   }
 
   fun reactivateCountdownConditional(location: CountdownConditionalLocation, reactivateState: CountdownConditional.ReactivateState) {
-    CountdownConditionalDbAdapter.reactivateOrThrow(connection, location, reactivateState)
+    withTransaction {
+      CountdownConditionalDbAdapter.reactivateOrThrow(connection, location, reactivateState)
+    }
   }
 
   fun reactivateCountdownAfterPleaConditional(location: CountdownAfterPleaConditionalLocation) {
-    CountdownAfterPleaConditionalDbAdapter.reactivateOrThrow(connection, location)
+    withTransaction {
+      CountdownAfterPleaConditionalDbAdapter.reactivateOrThrow(connection, location)
+    }
   }
+
   fun reDeactivateCountdownAfterPleaConditional(location: CountdownAfterPleaConditionalLocation, reDeactivateState: CountdownAfterPleaConditional.ReDeactivateState) {
-    CountdownAfterPleaConditionalDbAdapter.reDeactivateOrThrow(connection, location, reDeactivateState)
+    withTransaction {
+      CountdownAfterPleaConditionalDbAdapter.reDeactivateOrThrow(connection, location, reDeactivateState)
+    }
   }
 }

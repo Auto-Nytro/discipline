@@ -1,5 +1,7 @@
 package com.example.app.database
 
+import com.example.app.*
+
 object MainUserProfileScreenRegulationAlwaysRulesLinkingTable {
   const val TABLE = "MainUserProfileScreenRegulationAlwaysRulesLinkingTable"
 
@@ -23,7 +25,7 @@ object MainUserProfileScreenRegulationAlwaysRulesLinkingTable {
 
   fun insertOrThrow(database: DatabaseConnection, ruleId: AlwaysRuleId) {
     val buffer = Buffer()
-    writeInsert(buffer)
+    writeInsert(buffer, ruleId)
     database.execSqlOrThrow(buffer.string())
   }
 }

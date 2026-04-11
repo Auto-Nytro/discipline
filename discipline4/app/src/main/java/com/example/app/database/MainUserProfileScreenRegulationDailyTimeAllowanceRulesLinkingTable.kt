@@ -1,5 +1,7 @@
 package com.example.app.database
 
+import com.example.app.*
+
 object MainUserProfileScreenRegulationDailyTimeAllowanceRulesLinkingTable {
   const val TABLE = "MainUserProfileScreenRegulationDailyTimeAllowanceRulesLinkingTable"
 
@@ -23,7 +25,7 @@ object MainUserProfileScreenRegulationDailyTimeAllowanceRulesLinkingTable {
 
   fun insertOrThrow(database: DatabaseConnection, ruleId: TimeAllowanceRuleId) {
     val buffer = Buffer()
-    writeInsert(buffer)
+    writeInsert(buffer, ruleId)
     database.execSqlOrThrow(buffer.string())
   }
 }
