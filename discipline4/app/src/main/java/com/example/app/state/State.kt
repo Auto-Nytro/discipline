@@ -24,3 +24,13 @@ public data class State(
     }
   }
 }
+
+class AlwaysRuleGroupInfo(val locationInfo: AlwaysRuleLocation) {}
+
+fun State.getMonotonicNow(): Instant {
+  return monotonicClock.getNow()
+}
+
+fun State.getAlwaysRuleGroupInfo() {
+
+}
