@@ -1,5 +1,7 @@
 package com.example.app.database
 
+import com.example.app.*
+
 object MainUserProfileScreenRegulationTimeRangeRulesLinkingTable {
   const val TABLE = "MainUserProfileScreenRegulationTimeRangeRulesLinkingTable"
 
@@ -23,7 +25,7 @@ object MainUserProfileScreenRegulationTimeRangeRulesLinkingTable {
 
   fun insertOrThrow(database: DatabaseConnection, ruleId: TimeRangeRuleId) {
     val buffer = Buffer()
-    writeInsert(buffer)
+    writeInsert(buffer, ruleId)
     database.execSqlOrThrow(buffer.string())
   }
 }

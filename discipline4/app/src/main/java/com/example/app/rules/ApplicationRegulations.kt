@@ -1,5 +1,12 @@
 package com.example.app
 
+@JvmInline
+value class ApplicationRegulationId(val value: Long) {
+  fun toNumber(): Long {
+    return value
+  }
+}
+
 /**
  * Collection of rules for multiple applications
  */

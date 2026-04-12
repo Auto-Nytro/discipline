@@ -80,7 +80,7 @@ object TimeAllowanceRulesTable {
 
 
   fun writeCreateTable(buffer: Buffer) {
-    buffer.write("""
+    buffer.code("""
       CREATE TABLE IF NOT EXISTS $TABLE (
         $ID INTEGER PRIMARY KEY,
         $ALLOWANCE INTEGER NOT NULL,
@@ -98,7 +98,7 @@ object TimeAllowanceRulesTable {
     rule: TimeAllowanceRule,
   ) {
     buffer.apply {
-      write("INSERT INTO $TABLE VALUES (NULL, ")
+      code("INSERT INTO $TABLE VALUES (NULL, ")
       orderedTimeAllowanceRule(rule)
       code(");")
     }
@@ -110,7 +110,7 @@ object TimeAllowanceRulesTable {
   ): TimeAllowanceRuleId {
     val buffer = Buffer()
     writeInsertRule(buffer, rule)
-    TimeAllowanceRuleId(database.insertOrThrow(buffer.string()))
+    return TimeAllowanceRuleId(database.insertOrThrow(buffer.string()))
   }
 
   fun writeDeleteRule(

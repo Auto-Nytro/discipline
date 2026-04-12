@@ -1,7 +1,5 @@
 package com.example.app
 
-import kotlinx.coroutines.sync.Mutex
-
 public data class State(
   val monotonicClock: MonotonicClock,
   val mainUserProfile: UserProfile,

@@ -121,7 +121,7 @@ object AlwaysRulesTable {
   ): AlwaysRuleId {
     val buffer = Buffer()
     writeInsertRule(buffer, rule)
-    AlwaysRuleId(database.insertOrThrow(buffer.string()))
+    return AlwaysRuleId(database.insertOrThrow(buffer.string()))
   }
 
   fun writeDeleteRule(
