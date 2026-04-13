@@ -1,4 +1,5 @@
 package com.example.app
+package com.example.app
 
 import com.example.app.database.*
 
@@ -29,6 +30,7 @@ object ApplicationRegulationProcedure {
     }
 
     val regulation = ApplicationRegulation.createDefault()
+    val regulation = ApplicationRegulation.createDefault()
 
     try {
       database.createApplicationRegulation(location, applicationName)
@@ -41,6 +43,12 @@ object ApplicationRegulationProcedure {
     return CreateReturn.Success(applicationName, regulation)
   }
 
+  sealed class DeleteReturn {
+    class NoSuchApplicationRegulation() : DeleteReturn() {}
+    class PermissionDenied() : DeleteReturn() {}
+    class InternalError(val error: Throwable) : DeleteReturn() {}
+    class Success(val rule: ApplicationRegulation) : DeleteReturn() {}
+  }
   sealed class DeleteReturn {
     class NoSuchApplicationRegulation() : DeleteReturn() {}
     class PermissionDenied() : DeleteReturn() {}
