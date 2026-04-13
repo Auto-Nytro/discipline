@@ -23,8 +23,8 @@ public data class ApplicationRegulations private constructor(
     }
   }
   
-  fun add(app: ApplicationName, rule: ApplicationRegulation) {
-    regulations.set(app, rule)
+  fun add(applicationName: ApplicationName, regulation: ApplicationRegulation) {
+    regulations.set(applicationName, regulation)
   }
   
   fun remove(app: ApplicationName) {

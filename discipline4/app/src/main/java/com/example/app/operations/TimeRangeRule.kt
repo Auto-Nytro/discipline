@@ -1,75 +1,96 @@
-package com.example.app.procedures.timerangerule
+package com.example.app
 
-import com.example.app.*
 import com.example.app.database.*
 
-sealed class CreateReturn {
-  class TooManyRules() : CreateReturn() {}
-  class DuplicateRuleId() : CreateReturn() {}
-  class Database(val error: Throwable) : CreateReturn() {}
-  class Success(val id: TimeRangeRuleId, val rule: TimeRangeRule) : CreateReturn() {}
-}
-
-fun create(
-  database: DatabaseConnection,
-  adapter: TimeRangeRuleDbAdapter,
-  location: TimeRangeRuleLocation,
-  rules: TimeRangeRules,
-  stats: RulesStats,
-  ruleCondition: TimeRange,
-  ruleEnablerCreator: RuleEnabler.Creator
-): CreateReturn {
-  if (stats.isFull()) {
-    return CreateReturn.TooManyRules()
+object TimeRangeRuleProcedures {
+  sealed class CreateReturn {
+    class PermissionError(val value: GetCreateRulePermissionError) : CreateReturn() {}
+    class GetGroupInfo(val value: GetTimeRangeRuleGroupInfoError) : CreateReturn() {}
+    class InternalError(val error: Throwable) : CreateReturn() {}
+    class Success(val id: TimeRangeRuleId, val rule: TimeRangeRule) : CreateReturn() {}
   }
 
-  val rule = TimeRangeRule.create(
-    ruleEnablerCreator.create(),
-    ruleCondition,
-  )
+  fun create(
+    state: State,
+    database: Database,
+    ruleGroupId: TimeRangeRuleGroupId,
+    ruleEnablerCreator: RuleEnabler.Creator,
+    ruleCondition: TimeRange,
+  ): CreateReturn {
+    val ruleGroupLocation = state.getTimeRangeRuleGroupLocation(ruleGroupId).let {
+      when (it) {
+        is Tried.Failure -> {
+          return CreateReturn.GetGroupInfo(it.error)
+        }
+        is Tried.Success -> {
+          it.value
+        }
+      }
+    }
 
-  val ruleId = try {
-    adapter.createOrThrow(database, location, rule)
-  } catch (exception: Throwable) {
-    return CreateReturn.Database(exception)
+    val rule = TimeRangeRule.create(
+      enabler = ruleEnablerCreator.create(),
+      timeRange = ruleCondition,
+    )
+
+    val ruleId = try {
+      database.createTimeRangeRule(ruleGroupLocation, ruleGroupId, rule)
+    } catch (exception: Throwable) {
+      return CreateReturn.InternalError(exception)
+    }
+
+    state.createTimeRangeRuleOrNoop(ruleGroupLocation, ruleId, rule)
+    return CreateReturn.Success(ruleId, rule)
   }
 
-  rules.add(ruleId, rule)
-  stats.updateAfterTimeRangeRuleCreated()
-  return CreateReturn.Success(ruleId, rule)
-}
-
-sealed class DeleteReturn {
-  class NoSuchRule() : DeleteReturn() {}
-  class PermissionDenied() : DeleteReturn() {}
-  class Database(val error: Throwable) : DeleteReturn() {}
-  class Success(val rule: TimeRangeRule) : DeleteReturn() {}
-}
-
-fun delete(
-  database: DatabaseConnection, 
-  adapter: TimeRangeRuleDbAdapter,
-  location: TimeRangeRuleLocation,
-  rules: TimeRangeRules,
-  stats: RulesStats,
-  ruleId: TimeRangeRuleId,
-  clock: MonotonicClock,
-): DeleteReturn {
-  val rule = rules.get(ruleId)
-    ?: return DeleteReturn.NoSuchRule()
-
-  val now = clock.getNow()
-  if (rule.isEnabled(now)) {
-    return DeleteReturn.PermissionDenied()
+  sealed class DeleteReturn {
+    class RuleEnabled() : DeleteReturn() {}
+    class NoSuchRuleGroup(val value: GetTimeRangeRuleGroupInfoError) : DeleteReturn() {}
+    class NoSuchRule(val value: GetTimeRangeRuleError) : DeleteReturn() {}
+    class InternalError(val error: Throwable) : DeleteReturn() {}
+    class Success(val rule: TimeRangeRule) : DeleteReturn() {}
   }
 
-  try {
-    adapter.deleteOrThrow(database, location, ruleId)
-  } catch (exception: Throwable) {
-    return DeleteReturn.Database(exception)
-  }
+  fun delete(
+    state: State,
+    database: Database,
+    ruleGroupId: TimeRangeRuleGroupId,
+    ruleId: TimeRangeRuleId,
+  ): DeleteReturn {
+    val ruleGroupLocation = state.getTimeRangeRuleGroupLocation(ruleGroupId).let {
+      when (it) {
+        is Tried.Success -> {
+          it.value
+        }
+        is Tried.Failure -> {
+          return DeleteReturn.NoSuchRuleGroup(it.error)
+        }
+      }
+    }
 
-  rules.remove(ruleId)
-  stats.updateAfterTimeRangeRuleDeleted()
-  return DeleteReturn.Success(rule)
+    val rule = state.getTimeRangeRule(ruleGroupLocation, ruleId).let {
+      when (it) {
+        is Tried.Success -> {
+          it.value
+        }
+        is Tried.Failure -> {
+          return DeleteReturn.NoSuchRule(it.error)
+        }
+      }
+    }
+
+    val now = state.getMonotonicNow()
+    if (rule.isEnabled(now)) {
+      return DeleteReturn.RuleEnabled()
+    }
+
+    try {
+      database.deleteTimeRangeRule(ruleGroupLocation, ruleGroupId, ruleId)
+    } catch (exception: Throwable) {
+      return DeleteReturn.InternalError(exception)
+    }
+    
+    state.deleteTimeRangeRuleOrNoop(ruleGroupLocation, ruleId)
+    return DeleteReturn.Success(rule)
+  }
 }

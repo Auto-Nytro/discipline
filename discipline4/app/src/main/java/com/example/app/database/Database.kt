@@ -24,39 +24,79 @@ class Database(
     }
   }
 
-  fun createAlwaysRule(location: AlwaysRuleLocation, rule: AlwaysRule): AlwaysRuleId {
+  fun createAlwaysRule(ruleGroupLocator: AlwaysRuleLocation, ruleGroupId: AlwaysRuleGroupId, rule: AlwaysRule): AlwaysRuleId {
     return withTransaction {
-      AlwaysRuleDbAdapter.createOrThrow(connection, location, rule)
+      AlwaysRuleDbAdapter.createOrThrow(connection, ruleGroupLocator, rule)
     }
   }
 
-  fun deleteAlwaysRule(location: AlwaysRuleLocation, ruleId: AlwaysRuleId) {
+  fun deleteAlwaysRule(
+    ruleGroupLocation: AlwaysRuleLocation, 
+    ruleGroupId: AlwaysRuleGroupId, 
+    ruleId: AlwaysRuleId,
+  ) {
     withTransaction {
-      AlwaysRuleDbAdapter.deleteOrThrow(connection, location, ruleId)
+      AlwaysRuleDbAdapter.deleteOrThrow(
+        connection, 
+        ruleGroupLocation, 
+        ruleId,
+      )
     }
   }
 
-  fun createTimeRangeRule(location: TimeRangeRuleLocation, rule: TimeRangeRule): TimeRangeRuleId {
+  fun createTimeRangeRule(
+    ruleGroupLocation: TimeRangeRuleLocation, 
+    ruleGroupId: TimeRangeRuleGroupId, 
+    rule: TimeRangeRule,
+  ): TimeRangeRuleId {
     return withTransaction {
-      TimeRangeRuleDbAdapter.createOrThrow(connection, location, rule)
+      TimeRangeRuleDbAdapter.createOrThrow(
+        connection, 
+        ruleGroupLocation, 
+        rule,
+      )
     }
   }
 
-  fun deleteTimeRangeRule(location: TimeRangeRuleLocation, ruleId: TimeRangeRuleId) {
+  fun deleteTimeRangeRule(
+    ruleGroupLocation: TimeRangeRuleLocation,
+    ruleGroupId: TimeRangeRuleGroupId,
+    ruleId: TimeRangeRuleId,
+  ) {
     withTransaction {
-      TimeRangeRuleDbAdapter.deleteOrThrow(connection, location, ruleId)
+      TimeRangeRuleDbAdapter.deleteOrThrow(
+        connection,
+        ruleGroupLocation,
+        ruleId,
+      )
     }
   }
 
-  fun createTimeAllowanceRule(location: TimeAllowanceRuleLocation, rule: TimeAllowanceRule): TimeAllowanceRuleId {
+  fun createTimeAllowanceRule(
+    ruleGroupLocation: TimeAllowanceRuleLocation, 
+    ruleGroupId: TimeAllowanceRuleGroupId, 
+    rule: TimeAllowanceRule,
+  ): TimeAllowanceRuleId {
     return withTransaction {
-      TimeAllowanceRuleDbAdapter.createOrThrow(connection, location, rule)
+      TimeAllowanceRuleDbAdapter.createOrThrow(
+        connection, 
+        ruleGroupLocation, 
+        rule,
+      )
     }
   }
 
-  fun deleteTimeAllowanceRule(location: TimeAllowanceRuleLocation, ruleId: TimeAllowanceRuleId) {
+  fun deleteTimeAllowanceRule(
+    ruleGroupLocation: TimeAllowanceRuleLocation,
+    ruleGroupId: TimeAllowanceRuleGroupId,
+    ruleId: TimeAllowanceRuleId,
+  ) {
     withTransaction {
-      TimeAllowanceRuleDbAdapter.deleteOrThrow(connection, location, ruleId)
+      TimeAllowanceRuleDbAdapter.deleteOrThrow(
+        connection,
+        ruleGroupLocation,
+        ruleId,
+      )
     }
   }
 

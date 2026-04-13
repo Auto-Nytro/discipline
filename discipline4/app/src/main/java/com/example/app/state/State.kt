@@ -5,6 +5,9 @@ public data class State(
   val mainUserProfile: UserProfile,
   val rulesStats: RulesStats,
   val applicationRegulationsStats: ApplicationRegulationsStats,
+  val alwaysRuleGroupInfoMap: AlwaysRuleGroupInfoMap,
+  val timeRangeRuleGroupInfoMap: TimeRangeRuleGroupInfoMap,
+  val timeAllowanceRuleGroupInfoMap: TimeAllowanceRuleGroupInfoMap,
 ) {
   companion object {
     val MONOTONIC_CLOCK_SYNCHRONIZATION_INTERVAL = Duration.fromMinutes(10).getOrThrow()

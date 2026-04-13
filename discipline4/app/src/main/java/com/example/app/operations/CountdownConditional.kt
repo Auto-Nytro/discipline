@@ -1,29 +1,46 @@
-package com.example.app.procedures.countdownconditional
+package com.example.app
 
-import com.example.app.*
 import com.example.app.database.*
 
-sealed class ReactivateReturn {
-  class Database(val error: Throwable) : ReactivateReturn() {}
-  class Success() : ReactivateReturn() {}
+sealed class GetCountdownConditionalError {
+  class NotFound() : GetCountdownConditionalError() {}
 }
 
-fun reactivate(
-  database: DatabaseConnection,
-  adapter: CountdownConditionalDbAdapter,
-  location: CountdownConditionalLocation,
-  conditional: CountdownConditional,
-  clock: MonotonicClock,
-): ReactivateReturn {
-  val now = clock.getNow()
-  val reactivateState = conditional.createReactivateState(now)
+fun State.getCountdownConditional(
+  locator: CountdownConditionalLocation,
+): Tried<CountdownConditional, GetCountdownConditionalError> {
+  TODO()
+}
 
-  try {
-    adapter.reactivateOrThrow(database, location, reactivateState)
-  } catch (exception: Throwable) {
-    return ReactivateReturn.Database(exception)
+object CountdownConditionalProcedures {
+  sealed class ReactivateReturn {
+    class NonExisting(val it: GetCountdownConditionalError) : ReactivateReturn() {}
+    class Database(val it: Throwable) : ReactivateReturn() {}
+    class Success() : ReactivateReturn() {}
   }
 
-  conditional.reactivateFromState(reactivateState)
-  return ReactivateReturn.Success()
+  fun reactivate(
+    state: State,
+    database: Database,
+    locator: CountdownConditionalLocation,
+  ): ReactivateReturn {
+    val conditional = state.getCountdownConditional(locator).let {
+      when (it) {
+        is Tried.Success -> it.value,
+        is Tried.Failure -> return ReactivateReturn.NonExisting(it.error),
+      }
+    }
+
+    val now = state.getMonotonicNow()
+    val reactivateState = conditional.createReactivateState(now)
+
+    try {
+      database.reactivateCountdownConditional(locator, reactivateState)
+    } catch (exception: Throwable) {
+      return ReactivateReturn.Database(exception)
+    }
+
+    conditional.reactivateFromState(reactivateState)
+    return ReactivateReturn.Success()
+  }
 }

@@ -1,75 +1,77 @@
-package com.example.app.procedures.applicationregulation
+package com.example.app
 
-import com.example.app.*
 import com.example.app.database.*
 
-sealed class CreateReturn {
-  class TooManyRegulations() : CreateReturn() {}
-  class DuplicateRegulationId() : CreateReturn() {}
-  class InternalError(val error: Throwable) : CreateReturn() {}
-  class Success(val app: ApplicationName, val regulation: ApplicationRegulation) : CreateReturn() {}
-}
+class ApplicationRegulationGroupId() {}
+class ApplicationRegulationGroupLocationInfo() {}
+class ApplicationRegulationGroupsMap() {}
 
-fun create(
-  database: DatabaseConnection,
-  adapter: ApplicationRegulationDbAdapter,
-  location: ApplicationRegulationLocation,
-  regulations: ApplicationRegulations,
-  regulationsStats: ApplicationRegulationsStats,
-  applicationName: ApplicationName,
-): CreateReturn {
-  if (regulationsStats.isFull()) {
-    return CreateReturn.TooManyRegulations()
-  }
-  
-  if (regulations.has(applicationName)) {
-    return CreateReturn.DuplicateRegulationId()
+object ApplicationRegulationProcedure {
+  sealed class CreateReturn {
+    class TooManyRegulations() : CreateReturn() {}
+    class ApplicationAlreadyRegulated() : CreateReturn() {}
+    class InternalError(val error: Throwable) : CreateReturn() {}
+    class Success(val app: ApplicationName, val regulation: ApplicationRegulation) : CreateReturn() {}
   }
 
-  val regulation = ApplicationRegulation.createDefault()
+  fun create(
+    state: State,
+    database: Database,
+    location: ApplicationRegulationLocation,
+    applicationName: ApplicationName,
+  ): CreateReturn {
+    if (state.applicationRegulationsStats.isFull()) {
+      return CreateReturn.TooManyRegulations()
+    }
+    
+    if (state.mainUserProfile.applicationRegulations.has(applicationName)) {
+      return CreateReturn.ApplicationAlreadyRegulated()
+    }
 
-  try {
-    adapter.createOrThrow(database, location, applicationName)
-  } catch (exception: Throwable) {
-    return CreateReturn.InternalError(exception)
+    val regulation = ApplicationRegulation.createDefault()
+
+    try {
+      database.createApplicationRegulation(location, applicationName)
+    } catch (exception: Throwable) {
+      return CreateReturn.InternalError(exception)
+    }
+
+    state.mainUserProfile.applicationRegulations.add(applicationName, regulation)
+    state.applicationRegulationsStats.applicationRegulationsNumber += 1
+    return CreateReturn.Success(applicationName, regulation)
   }
 
-  regulations.add(applicationName, regulation)
-  regulationsStats.applicationRegulationsNumber += 1
-  return CreateReturn.Success(applicationName, regulation)
-}
-
-sealed class DeleteReturn {
-  class NoSuchApplicationRegulation() : DeleteReturn() {}
-  class PermissionDenied() : DeleteReturn() {}
-  class InternalError(val error: Throwable) : DeleteReturn() {}
-  class Success(val rule: ApplicationRegulation) : DeleteReturn() {}
-}
-
-fun delete(
-  database: DatabaseConnection,
-  adapter: ApplicationRegulationDbAdapter,
-  location: ApplicationRegulationLocation,
-  regulations: ApplicationRegulations,
-  regulationsStats: ApplicationRegulationsStats,
-  applicationName: ApplicationName,
-  clock: MonotonicClock,
-): DeleteReturn {
-  val regulation = regulations.get(applicationName)
-    ?: return DeleteReturn.NoSuchApplicationRegulation()
-
-  val now = clock.getNow()
-  if (regulation.isEnabled(now)) {
-    return DeleteReturn.PermissionDenied()
+  sealed class DeleteReturn {
+    class NoSuchApplicationRegulation() : DeleteReturn() {}
+    class PermissionDenied() : DeleteReturn() {}
+    class InternalError(val error: Throwable) : DeleteReturn() {}
+    class Success(val rule: ApplicationRegulation) : DeleteReturn() {}
   }
 
-  try {
-    adapter.deleteOrThrow(database, location, applicationName)
-  } catch (exception: Throwable) {
-    return DeleteReturn.InternalError(exception)
-  }
+  fun delete(
+    database: Database,
+    location: ApplicationRegulationLocation,
+    applicationName: ApplicationName,
+  ): DeleteReturn {
+    val regulations = state.mainUserProfile.regulations
+    val stats = state.applicationRegulationsStats
 
-  regulations.remove(applicationName)
-  regulationsStats.applicationRegulationsNumber -= 1
-  return DeleteReturn.Success(regulation)
+    val regulation = regulations.get(applicationName)
+      ?: return DeleteReturn.NoSuchApplicationRegulation()
+
+    val now = state.getMonotonicNow()
+    if (regulation.isEnabled(now)) {
+      return DeleteReturn.PermissionDenied()
+    }
+
+    try {
+      database.deleteApplicationRegulation(location, applicationName)
+    } catch (exception: Throwable) {
+      return DeleteReturn.InternalError(exception)
+    }
+
+    regulations.remove(applicationName)
+    stats.applicationRegulationsNumber -= 1
+    return DeleteReturn.Success(regulation)
+  }
 }

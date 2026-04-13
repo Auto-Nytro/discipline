@@ -66,7 +66,7 @@ sealed class TimeAllowanceRuleLocateError {
 
 sealed class TimeAllowanceRuleLocation {
   class MainUserProfileScreenRegulationDailyTimeAllowance(val regulationId: ApplicationRegulationId) : TimeAllowanceRuleLocation() {}
-  class MainUserProfileApplicationRegulationDailyTimeAllowance(val regulationId: ApplicationRegulationId) : TimeAllowanceRuleLocation() {}
+  class MainUserProfileApplicationRegulationDailyTimeAllowance(val regulationId: ApplicationRegulationId, val applicationName: ApplicationName) : TimeAllowanceRuleLocation() {}
 }
 
 sealed class ApplicationRegulationLocateError() {
@@ -85,35 +85,35 @@ sealed class VaultLocation() {
   class MainUserProfile() : VaultLocation() {}
 }
 
-object Procedures {
-  suspend fun createApplicationRegulation(
-    database: DatabaseConnection,
-    state: State,
-    location: ApplicationRegulationLocation, 
-    applicationName: ApplicationName,
-  ): com.example.app.procedures.applicationregulation.CreateReturn {
-    return when (location) {
-      is ApplicationRegulationLocation.MainUserProfile -> {
-        com.example.app.procedures.applicationregulation.create(
-          database,
-          ApplicationRegulationDbAdapter,
-          location,
-          state.mainUserProfile.applicationRegulations,
-          state.applicationRegulationsStats,
-          applicationName,
-        )
-      }
-    }
-  }
+// object Procedures {
+//   suspend fun createApplicationRegulation(
+//     database: DatabaseConnection,
+//     state: State,
+//     location: ApplicationRegulationLocation, 
+//     applicationName: ApplicationName,
+//   ): com.example.app.procedures.applicationregulation.CreateReturn {
+//     return when (location) {
+//       is ApplicationRegulationLocation.MainUserProfile -> {
+//         com.example.app.procedures.applicationregulation.create(
+//           database,
+//           ApplicationRegulationDbAdapter,
+//           location,
+//           state.mainUserProfile.applicationRegulations,
+//           state.applicationRegulationsStats,
+//           applicationName,
+//         )
+//       }
+//     }
+//   }
 
-  suspend fun deleteApplicationRegulation(
-    database: DatabaseConnection,
-    state: State,
-    location: ApplicationRegulationLocation, 
-    regulationId: ApplicationRegulationId,
-  ) {
-    when (location) {
-      is ApplicationREgulationLocation.
-    }
-  }
-}
+//   suspend fun deleteApplicationRegulation(
+//     database: DatabaseConnection,
+//     state: State,
+//     location: ApplicationRegulationLocation, 
+//     regulationId: ApplicationRegulationId,
+//   ) {
+//     when (location) {
+//       is ApplicationREgulationLocation.
+//     }
+//   }
+// }
