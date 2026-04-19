@@ -1,7 +1,7 @@
 {
   "files.autoSave": "afterDelay",
   "editor.fontSize": 18,
-  "editor.fontFamily": "NovaMono",
+  "editor.fontFamily": "Purisa",
   // "editor.letterSpacing": 1.5,
   "rust-analyzer.linkedProjects": [
     "discipline_slint/Cargo.toml"

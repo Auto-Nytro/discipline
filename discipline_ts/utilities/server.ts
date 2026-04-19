@@ -1,5 +1,5 @@
 import { _ } from "../../encode/index.ts";
-import { Branded, Duration, Tried, ProgramT, State, Countdown, Program, UptimeAllowanceConditional, VaultName, VaultData, Integer, Vault, DateTime } from "../x.ts";
+import { Branded, Duration, Tried, ProgramT, State, Countdown, Program, UptimeAllowanceConditional, VaultName, VaultData, Integer, Vault, DateTime } from "@internal/prelude";
 
 const HTTP_OK_CODE = 200;
 const HTTP_OK_TEXT = "OK";

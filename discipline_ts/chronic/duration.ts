@@ -1,4 +1,4 @@
-import { FAILURE, FailureCode, TextualError, Tried, Unique } from "../x.ts";
+import { FAILURE, FailureCode, TextualError, Tried, Unique } from "@internal/prelude";
 
 const BRAND = Symbol();
 

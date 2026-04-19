@@ -1,4 +1,4 @@
-import { Duration, DateTime, Instant, Branded } from "../x.ts";
+import { Duration, DateTime, Instant, Branded } from "@internal/prelude";
 
 const BRAND = Symbol();
 
@@ -7,7 +7,7 @@ export type MonotonicClock = Branded<typeof BRAND, {
   previousSynchronizationTime: DateTime,
 }>;
 
-export const construct = (
+const construct = (
   elapsedTime: Duration,
   previousSynchronizationTime: DateTime,
 ): MonotonicClock => {
@@ -17,32 +17,32 @@ export const construct = (
   });
 };
 
-export const create = (now: DateTime): MonotonicClock => {
+const create = (now: DateTime): MonotonicClock => {
   return construct(
     Duration.zero(),
     now,
   );
 };
 
-export const synchronize = (it: MonotonicClock, now: DateTime): void => {
+const synchronize = (it: MonotonicClock, now: DateTime): void => {
   const interval = DateTime.tillOrZero(it.previousSynchronizationTime, now);
   it.elapsedTime = Duration.saturatingAdd(it.elapsedTime, interval);
   it.previousSynchronizationTime = now;
 };
 
-export const getElapsedTime = (it: MonotonicClock): Duration => {
+const getElapsedTime = (it: MonotonicClock): Duration => {
   return it.elapsedTime;
 };
 
-export const getPreviousSynchronizationTime = (it: MonotonicClock): DateTime => {
+const getPreviousSynchronizationTime = (it: MonotonicClock): DateTime => {
   return it.previousSynchronizationTime;
 };
 
-export const getNow = (it: MonotonicClock): Instant => {
+const getNow = (it: MonotonicClock): Instant => {
   return Instant.fromElapsedTime(it.elapsedTime);
 };
 
-export const getNowAsDateTime = (it: MonotonicClock): DateTime => {
+const getNowAsDateTime = (it: MonotonicClock): DateTime => {
   const now = DateTime.now();
   if (DateTime.isEarilerThan(now, it.previousSynchronizationTime)) {
     return now;

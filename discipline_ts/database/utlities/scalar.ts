@@ -1,4 +1,4 @@
-import { ScalarRead, ScalarWrite } from "./mod.ts";
+import { ScalarRead, ScalarWrite } from "@internal/database/prelude";
 
 export interface Scalar<Value> extends 
   ScalarRead<Value>, 

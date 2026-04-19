@@ -1,5 +1,5 @@
 import * as SQLite from "jsr:@db/sqlite";
-import { Branded, Serialization, Tried } from "../x.ts";
+import { Branded, Serialization, Tried } from "@internal/prelude";
 
 type GetRowReturn = {
   readonly data?: null | string | number | Uint8Array

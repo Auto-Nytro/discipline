@@ -1,4 +1,4 @@
-import { Integer, Float, Nullable, TextualError } from "../../x.ts"
+import { Integer, Float, Nullable, TextualError } from "@internal/prelude"
 
 export interface ScalarReadSource<Source> {
   readonly isNull: (source: Source) => boolean;

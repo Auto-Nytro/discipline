@@ -2,12 +2,10 @@ package com.example.app
 
 import com.example.app.TextualError
 import com.example.app.Duration
-import androidx.room.Entity
 
 /**
  * Represents a time of day (no date component) with millisecond precision
  */
-@Entity
 @JvmInline
 value class Time private constructor(
   private val timestamp: Int

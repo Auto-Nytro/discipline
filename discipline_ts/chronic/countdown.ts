@@ -1,6 +1,6 @@
-import { Duration, Unique, Instant } from "../x.ts";
+import { Duration, Unique, Instant } from "@internal/prelude";
 
-export const enum CountdownStatus {
+const enum CountdownStatus {
   Pending,
   Running,
   Finished,
@@ -29,59 +29,59 @@ export type CountdownFinished = Countdown & {
 };
 
 // TODO: Make private
-export const construct = (from: Instant, duration: Duration): Countdown => {
+const construct = (from: Instant, duration: Duration): Countdown => {
   return {
     from,
     duration,
   } satisfies RawCountdown as Countdown;
 };
 
-export const reconstruct = construct;
-export const create = construct;
+const reconstruct = construct;
+const create = construct;
 
-export const getFrom = (it: Countdown): Instant => {
+const getFrom = (it: Countdown): Instant => {
   return it.from;
 };
 
-export const getTill = (it: Countdown): Instant => {
+const getTill = (it: Countdown): Instant => {
   return Instant.saturatingAdd(it.from, it.duration);
 };
 
-export const getTotalDuration = (it: Countdown): Duration => {
+const getTotalDuration = (it: Countdown): Duration => {
   return it.duration;
 };
 
-export const setTotalDuration = (it: Countdown, duration: Duration): void => {
+const setTotalDuration = (it: Countdown, duration: Duration): void => {
   it.duration = duration;
 };
 
-export const getTimeTillStartOrZero = (it: Countdown, now: Instant): Duration => {
+const getTimeTillStartOrZero = (it: Countdown, now: Instant): Duration => {
   return Instant.tillOrZero(now, it.from);
 };
 
-export const getTimeSinceStartOrZero = (it: Countdown, now: Instant): Duration => {
+const getTimeSinceStartOrZero = (it: Countdown, now: Instant): Duration => {
   return Instant.sinceOrZero(now, it.from);
 };
 
-export const getElapsedTimeOrZero = (it: Countdown, now: Instant): Duration => {
+const getElapsedTimeOrZero = (it: Countdown, now: Instant): Duration => {
   return Duration.min(
     getTimeSinceStartOrZero(it, now),
     it.duration
   );
 };
 
-export const getRemainingTimeOrZero = (it: Countdown, now: Instant): Duration => {
+const getRemainingTimeOrZero = (it: Countdown, now: Instant): Duration => {
   return Duration.saturatingSub(
     getTotalDuration(it),
     getElapsedTimeOrZero(it, now)
   );
 };
 
-export const getTimeTillFinishOrZero = (it: Countdown, now: Instant): Duration => {
+const getTimeTillFinishOrZero = (it: Countdown, now: Instant): Duration => {
   return Instant.tillOrZero(now, getTill(it));
 };
 
-export const getStatus = (it: Countdown, now: Instant): CountdownStatus => {
+const getStatus = (it: Countdown, now: Instant): CountdownStatus => {
   if (Instant.isEarilerThan(now, it.from)) {
     return CountdownStatus.Pending;
   }
@@ -94,23 +94,23 @@ export const getStatus = (it: Countdown, now: Instant): CountdownStatus => {
   return CountdownStatus.Finished;
 };
 
-export const isPending = (it: Countdown, now: Instant): boolean => {
+const isPending = (it: Countdown, now: Instant): boolean => {
   return getStatus(it, now) === CountdownStatus.Pending;
 };
 
-export const isRunning = (it: Countdown, now: Instant): boolean => {
+const isRunning = (it: Countdown, now: Instant): boolean => {
   return getStatus(it, now) === CountdownStatus.Running;
 };
 
-export const isFinished = (it: Countdown, now: Instant): boolean => {
+const isFinished = (it: Countdown, now: Instant): boolean => {
   return getStatus(it, now) === CountdownStatus.Finished;
 };
 
-export const saturatingIncrementDuration = (it: Countdown, factor: Duration): void => {
+const saturatingIncrementDuration = (it: Countdown, factor: Duration): void => {
   it.duration = Duration.saturatingAdd(it.duration, factor);
 };
 
-export const match = <A, B, C>(
+const match = <A, B, C>(
   it: Countdown,
   now: Instant,
   cases: {

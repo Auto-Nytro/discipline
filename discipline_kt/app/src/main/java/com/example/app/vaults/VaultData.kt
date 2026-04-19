@@ -1,12 +1,10 @@
 package com.example.app
 
 import com.example.app.*
-import androidx.room.Entity
 
 /**
  * Represents vault data content with length constraints
  */
-@Entity
 @JvmInline
 public value class VaultData private constructor(val value: String) {
   

@@ -1,4 +1,4 @@
-import { Branded, Countdown, DateTime, Duration, Tried } from "../x.ts";
+import { Branded, Countdown, DateTime, Duration, Tried } from "@internal/prelude";
 
 const BRAND = Symbol();
 

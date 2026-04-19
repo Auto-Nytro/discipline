@@ -1,5 +1,5 @@
-import { Float, Integer, Nullable } from "../../x.ts";
-import { Name, Scalar } from "./mod.ts"
+import { Float, Integer, Nullable } from "@internal/prelude";
+import { Name, Scalar } from "@internal/database/prelude"
 
 export interface NamedWriteDestination<Destination> {
   writeNull: (destination: Destination, name: Name) => void;

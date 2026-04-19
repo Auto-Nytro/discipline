@@ -1,6 +1,6 @@
-// import { Serialization, Countdown, Duration, DateTime, Tried, StateT, TimeRange, Time, UptimeAllowanceConditional, VaultT, Vault, VaultName, VaultData, Option, State } from "../x.ts"
+// import { Serialization, Countdown, Duration, DateTime, Tried, StateT, TimeRange, Time, UptimeAllowanceConditional, VaultT, Vault, VaultName, VaultData, Option, State } from "@internal/prelude"
 
-import { Reflect, Tried } from "../x.ts";
+import { Reflect, Tried } from "@internal/prelude";
 
 // export const Duration_serialize = Serialization.Serialize_implement<Duration.DurationT>({
 //   write(value, destination) {

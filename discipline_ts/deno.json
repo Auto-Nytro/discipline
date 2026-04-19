@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "@std/path": "jsr:@std/path@^1.1.4",
+    "typescript": "npm:typescript",
+    "@internal/prelude": "./x.ts",
+    "@internal/database/prelude": "./database/mod.ts"
+  },
+  "compilerOptions": {
+    "skipLibCheck": true
+  }
+}

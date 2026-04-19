@@ -1,3 +1,3 @@
-import { Float, Integer } from "../../x.ts";
+import { Float, Integer } from "@internal/prelude";
 
 export type SqliteValue = null | Integer | Float | number | string;

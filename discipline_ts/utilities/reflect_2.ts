@@ -320,7 +320,7 @@
 //   }
 // };
 
-import { Nominal } from "../x.ts"
+import { Nominal } from "@internal/prelude"
 
 export const NONE_BRAND = Symbol();
 export const SOME_BRAND = Symbol();

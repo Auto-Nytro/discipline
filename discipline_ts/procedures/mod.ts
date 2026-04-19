@@ -1,4 +1,3 @@
-import { App, Countdown, CountdownRule, Duration, MonotonicClock } from "../x.ts";
 
 const createScreenCountdownRule = (
   app: App,

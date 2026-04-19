@@ -1,14 +1,12 @@
 package com.example.app
 
 import com.example.app.Duration
-import androidx.room.Entity
 
 /**
  * Represents a point in time measured as elapsed time from a reference point
  * (like system uptime or epoch)
  */
 @JvmInline
-@Entity()
 value class Instant private constructor(
   private val elapsedTime: Duration
 ) {

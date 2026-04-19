@@ -1,5 +1,4 @@
-
-import { Unique } from "../x.ts";
+import { Unique } from "@internal/prelude";
 
 const BRAND = Symbol();
 export type Integer = Unique<typeof BRAND, "Integer", number>;

@@ -1,4 +1,4 @@
-import { Duration } from "../x.ts"
+import { Duration } from "@internal/prelude"
 
 export const registerIntervalTimer = (duration: Duration, fn: () => void): number => {
   return setInterval(fn, Duration.toTotalMilliseconds(duration));

@@ -1,4 +1,4 @@
-import { Branded } from "../../x.ts";
+import { Branded } from "@internal/prelude";
 import { TextualErrorAttachment } from "./TextualErrorAttachment.ts"
 
 const brand = Symbol();

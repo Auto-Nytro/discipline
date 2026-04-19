@@ -1,4 +1,4 @@
-import { WithBrand } from "../../x.ts";
+import { WithBrand } from "@internal/prelude";
 import { TextualErrorContext } from "./TextualErrorContext.ts";
 import { TextualErrorAttachment } from "./TextualErrorAttachment.ts";
 

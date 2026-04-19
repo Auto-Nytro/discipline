@@ -1,27 +1,27 @@
-import { Duration, DateTime, FAILURE, FailureCode, TextualError, Time, Tried, Unique } from "../x.ts";
+import { Duration, DateTime, FAILURE, FailureCode, TextualError, Time, Tried, Unique } from "@internal/prelude";
 
 const BRAND = Symbol();
 
 export type Date = Unique<typeof BRAND, "Date", globalThis.Date>;
 
-export const construct = (date: globalThis.Date): Date => {
+const construct = (date: globalThis.Date): Date => {
   return date as Date;
 };
 
-export const MINIMUM_TIMESTAMP = -8.64e15;
-export const MAXIMUM_TIMESTAMP = 8.64e15;
+const MINIMUM_TIMESTAMP = -8.64e15;
+const MAXIMUM_TIMESTAMP = 8.64e15;
 
-export const today = (): Date => {
+const today = (): Date => {
   const date = new globalThis.Date();
   date.setUTCHours(0, 0, 0, 0);
   return construct(date);
 };
 
-export const getTimestamp = (it: Date): number => {
+const getTimestamp = (it: Date): number => {
   return it.getTime();
 };
 
-export const tillOrZero = (lhs: Date, rhs: Date): Duration => {
+const tillOrZero = (lhs: Date, rhs: Date): Duration => {
   const lhsTimestamp = lhs.getTime();
   const rhsTimestamp = rhs.getTime();
 
@@ -32,7 +32,7 @@ export const tillOrZero = (lhs: Date, rhs: Date): Duration => {
   }
 };
 
-export const sinceOrZero = (lhs: Date, rhs: Date): Duration => {
+const sinceOrZero = (lhs: Date, rhs: Date): Duration => {
   const lhsTimestamp = lhs.getTime();
   const rhsTimestamp = rhs.getTime();
 
@@ -43,7 +43,7 @@ export const sinceOrZero = (lhs: Date, rhs: Date): Duration => {
   }
 };
 
-export const fromTimestamp = (timestamp: number): Tried<Date, TextualError> => {
+const fromTimestamp = (timestamp: number): Tried<Date, TextualError> => {
   if (!Number.isInteger(timestamp)) {
     const it = TextualError.create("Creating a Date from a millisecond timestamp since the unix epoch");
     TextualError.addMessage(it, "Argument 'timestamp' is not an integer");
@@ -95,7 +95,7 @@ export const fromTimestamp = (timestamp: number): Tried<Date, TextualError> => {
   return Tried.Success(construct(date));
 };
 
-export const fromTimestampOrError = (
+const fromTimestampOrError = (
   timestamp: number,
   textualError: TextualError,
 ): Date | FailureCode => {
@@ -150,17 +150,17 @@ export const fromTimestampOrError = (
   return construct(date);
 };
 
-export const toString = (it: Date): string => {
+const toString = (it: Date): string => {
   return it.toISOString();
 };
 
-export const getDayStart = (it: Date): Date => {
+const getDayStart = (it: Date): Date => {
   const clone = new globalThis.Date(it);
   clone.setUTCHours(24, 0, 0, 0);
   return construct(clone);
 };
 
-export const getDurationTillMidnight = (it: Date): Duration => {
+const getDurationTillMidnight = (it: Date): Duration => {
   const clone = new globalThis.Date(it);
   clone.setUTCHours(24, 0, 0, 0);
 
@@ -171,7 +171,7 @@ export const getDurationTillMidnight = (it: Date): Duration => {
   return Duration.fromMillisecondsOrThrow(difference);
 };
 
-export const isLaterThan = (it: Date, rhs: Date): boolean => {
+const isLaterThan = (it: Date, rhs: Date): boolean => {
   return getTimestamp(it) > getTimestamp(rhs);
 };
 

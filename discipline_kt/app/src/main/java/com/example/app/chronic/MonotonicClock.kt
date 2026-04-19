@@ -1,12 +1,10 @@
 package com.example.app
 
 import com.example.app.*
-import androidx.room.Entity
 
 /**
  * A monotonic clock that only moves forward
  */
-@Entity
 public data class MonotonicClock(
   var elapsedTime: Duration,
   var previousSynchronizationTime: Instant,

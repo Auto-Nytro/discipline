@@ -1,4 +1,4 @@
-import { Integer, Float, Nullable } from "../../x.ts"
+import { Integer, Float, Nullable } from "@internal/prelude"
 
 export interface ScalarWriteDestination<Destination> {
   readonly writeNull: (destination: Destination) => void;

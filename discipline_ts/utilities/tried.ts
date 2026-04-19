@@ -1,4 +1,4 @@
-import { WithBrand, Nullable } from "../x.ts";
+import { WithBrand, Nullable } from "@internal/prelude";
 
 const SUCCESS_BRAND = Symbol();
 const FAILURE_BRAND = Symbol();

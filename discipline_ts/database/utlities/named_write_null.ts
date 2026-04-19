@@ -1,7 +1,6 @@
-import { Name } from "./mod.ts";
+import { Name } from "@internal/database/prelude";
 
 /**
- * 
  * Implemented by compound types that are to be stored in SQLite.
  */
 export interface NamedWriteNull<Names> {

@@ -1,8 +1,5 @@
 package com.example.app
 
-import androidx.room.Entity
-
-@Entity
 public sealed class RuleEnabler {
   class Countdown(val it: CountdownConditional) : RuleEnabler() {}
   class CountdownAfterPlea(val it: CountdownAfterPleaConditional) : RuleEnabler() {}

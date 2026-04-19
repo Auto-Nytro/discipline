@@ -1,4 +1,4 @@
-import { Tried, isInteger } from "../x.ts";
+import { Tried, isInteger } from "@internal/prelude";
 
 const FAILURE = Symbol();
 

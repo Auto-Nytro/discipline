@@ -1,42 +1,5 @@
-import { Float, Integer, Nullable, TextualError } from "../../x.ts";
-import { Index, Scalar } from "./mod.ts"
-
-// export interface ScalarIndexedRead<Value> {
-//   // fn internal_indexed_read(source: &mut impl IndexedReadSource, index: Index) -> Result<Self, ()>;
-
-//   /**
-//    * @throws {TextualError}
-//    */
-//   readonly readOrThrow: <Source>(
-//     source: Source,
-//     sourceImpl: IndexedReadSource<Source>,
-//   ) => Value;
-// }
-
-// // export interface CompoundIndexedRead<It, Indexes> {
-// //   // fn internal_indexed_read(source: &mut impl IndexedReadSource, indexes: &Self::Indexes) -> Result<Self, ()>;
-
-// //   readonly indexedRead: (
-// //     source: IndexedReadSource,
-// //   ) => It | FailureCode;
-// // }
-
-// export interface IndexedReadSource<Source> {
-//   readNullOrThrow: (source: Source, index: Index) => null;
-//   readIntegerOrThrow: (source: Source, index: Index) => Integer;
-//   readRealOrThrow: (source: Source, index: Index) => Float;
-//   readStringOrThrow: (source: Source, index: Index) => string;
-//   readBooleanOrThrow: (source: Source, index: Index) => boolean;
-//   readScalarOrThrow: <Type>(source: Source, index: Index, value: Type, descriptor: Scalar<Type>) => void;
-//   // writeCompoundValue: <Type, Indexes>(
-//   //   source: Source, 
-//   //   indexes: Indexes, 
-//   //   value: Type, 
-//   //   descriptor: Compound<Type, Indexes>,
-//   // ) => void;
-// }
-
-
+import { Float, Integer, Nullable, TextualError } from "@internal/prelude";
+import { Index, Scalar } from "@internal/database/prelude"
 
 export interface IndexedReadSource<Source> {
   readonly isNull: (source: Source, index: Index) => boolean;

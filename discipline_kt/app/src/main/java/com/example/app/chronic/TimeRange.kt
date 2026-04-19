@@ -7,7 +7,6 @@ import androidx.room.Entity
 /**
  * Represents a range of time within a day, possibly spanning midnight
  */
-@Entity
 public data class TimeRange private constructor(
   val fromTimestamp: Int,
   val tillTimestamp: Int

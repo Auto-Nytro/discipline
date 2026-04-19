@@ -1,7 +1,10 @@
-import { TextualError, Unique } from "../../x.ts";
+import { TextualError, Unique } from "@internal/prelude";
 
 const BRAND = Symbol();
 
+/**
+ * A column name used to access fields from the result of a SELECT statement.
+ */
 export type Name = Unique<typeof BRAND, "Name", string>;
 
 /**

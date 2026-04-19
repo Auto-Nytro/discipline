@@ -1,4 +1,4 @@
-import { Duration, TextualError, Tried, FailureCode, FAILURE, Unique } from "../x.ts";
+import { Duration, TextualError, Tried, FailureCode, FAILURE, Unique } from "@internal/prelude";
 
 const BRAND = Symbol();
 
@@ -8,10 +8,10 @@ const construct = (timestamp: number): Time => {
   return timestamp as Time;
 };
 
-export const MINIMUM_TIMESTAMP = 0;
-export const MAXIMUM_TIMESTAMP = 1000 * 60 * 60 * 24 - 1;
+const MINIMUM_TIMESTAMP = 0;
+const MAXIMUM_TIMESTAMP = 1000 * 60 * 60 * 24 - 1;
 
-export const fromTimestamp = (timestamp: number): Tried<Time, TextualError> => {
+const fromTimestamp = (timestamp: number): Tried<Time, TextualError> => {
   if (!Number.isInteger(timestamp)) {
     const it = TextualError.create("Creating a Time from a millisecond timestamp since midnight");
     TextualError.addMessage(it, "Argument 'timestamp' is not an integer");
@@ -38,7 +38,7 @@ export const fromTimestamp = (timestamp: number): Tried<Time, TextualError> => {
   return Tried.Success(construct(timestamp));
 };
 
-export const fromTimestampOrError = (
+const fromTimestampOrError = (
   timestamp: number,
   textualError: TextualError,
 ): Time | FailureCode => {
@@ -68,7 +68,7 @@ export const fromTimestampOrError = (
   return construct(timestamp);
 };
 
-export const fromHourAndMinuteAm = (hour: number, minute: number): Tried<Time, TextualError> => {
+const fromHourAndMinuteAm = (hour: number, minute: number): Tried<Time, TextualError> => {
   if (!Number.isInteger(hour)) {
     const it = TextualError.create("Creating a Time from a hour (AM) and minute arguments");
     TextualError.addMessage(it, "Argument 'hour' is not an integer");
@@ -114,7 +114,7 @@ export const fromHourAndMinuteAm = (hour: number, minute: number): Tried<Time, T
   ));
 };
 
-export const fromHourAndMinutePm = (hour: number, minute: number): Tried<Time, TextualError> => {
+const fromHourAndMinutePm = (hour: number, minute: number): Tried<Time, TextualError> => {
   if (!Number.isInteger(hour)) {
     const it = TextualError.create("Creating a Time from a hour (PM) and minute arguments");
     TextualError.addMessage(it, "Argument 'hour' is not an integer");
@@ -160,7 +160,7 @@ export const fromHourAndMinutePm = (hour: number, minute: number): Tried<Time, T
   ));
 };
 
-export const fromHourAndMinute = (hour: number, minute: number): Tried<Time, TextualError> => {
+const fromHourAndMinute = (hour: number, minute: number): Tried<Time, TextualError> => {
   if (!Number.isInteger(hour)) {
     const it = TextualError.create("Creating a Time from a hour and minute arguments");
     TextualError.addMessage(it, "Argument 'hour' is not an integer");
@@ -206,11 +206,11 @@ export const fromHourAndMinute = (hour: number, minute: number): Tried<Time, Tex
   ));
 };
 
-export const getTimestamp = (it: Time): number => {
+const getTimestamp = (it: Time): number => {
   return it;
 };
 
-export const getHour = (it: Time): number => {
+const getHour = (it: Time): number => {
   return Math.floor(
     getTimestamp(it) 
     /
@@ -218,7 +218,7 @@ export const getHour = (it: Time): number => {
   );
 };
 
-export const getMinute = (it: Time): number => {
+const getMinute = (it: Time): number => {
   return Math.floor(
     getTimestamp(it) 
     % 
@@ -228,7 +228,7 @@ export const getMinute = (it: Time): number => {
   );
 };
 
-export const getSecond = (it: Time): number => {
+const getSecond = (it: Time): number => {
   return Math.floor(
     getTimestamp(it)
     % 
@@ -240,7 +240,7 @@ export const getSecond = (it: Time): number => {
   );
 };
 
-export const toString = (it: Time): string => {
+const toString = (it: Time): string => {
   return `${
     getHour(it).toString()
   }:${

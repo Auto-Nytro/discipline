@@ -1,4 +1,4 @@
-import { Duration, DateTime, Branded, Date } from "../x.ts";
+import { Duration, DateTime, Branded, Date } from "@internal/prelude";
 
 const BRAND = Symbol();
 
@@ -17,14 +17,14 @@ const construct = (
   });
 };
 
-export const create = (now: DateTime): UptimeClock => {
+const create = (now: DateTime): UptimeClock => {
   return construct(
     Duration.zero(),
     now,
   );
 };
 
-export const synchronize = (
+const synchronize = (
   it: UptimeClock,
   now: DateTime,
   synchronizationInterval: Duration,
@@ -58,11 +58,11 @@ export const synchronize = (
   it.previousSynchronizationTime = now;
 }
 
-export const getDailyUptime = (it: UptimeClock) => {
+const getDailyUptime = (it: UptimeClock) => {
   return it.dailyUptime;
 };
 
-export const getPreviousSynchronizationTime = (it: UptimeClock): DateTime => {
+const getPreviousSynchronizationTime = (it: UptimeClock): DateTime => {
   return it.previousSynchronizationTime;
 };
 

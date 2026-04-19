@@ -1,11 +1,8 @@
 package com.example.app
 
-import androidx.room.Entity
-
 /**
  * Statistics about vaults
  */
-@Entity
 public data class VaultsStats private constructor(
   var vaultsNumber: Int,
   var maximumVaultsNumber: Int

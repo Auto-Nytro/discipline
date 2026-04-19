@@ -1,4 +1,4 @@
-import { NamedWriteDestination } from "./mod.ts";
+import { NamedWriteDestination } from "@internal/database/prelude";
 
 export interface Buffer {
   readonly buffer: string[],

@@ -2,12 +2,10 @@ package com.example.app
 
 import com.example.app.Instant
 import com.example.app.Duration
-import androidx.room.Entity
 
 /**
  * Tracks daily uptime, resetting at midnight
  */
-@Entity
 public data class UptimeClock(
   var totalDailyUptime: Duration,
   var totalWeeklyUptime: Duration,

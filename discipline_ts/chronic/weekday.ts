@@ -1,4 +1,4 @@
-import { Integer, TextualError, Unique } from "../x.ts";
+import { Integer, TextualError, Unique } from "@internal/prelude";
 
 const BRAND = Symbol();
 

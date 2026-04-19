@@ -1,12 +1,10 @@
 package com.example.app
 
 import com.example.app.*
-import androidx.room.Entity
 
 /**
  * Represents a vault name with length constraints
  */
-@Entity
 @JvmInline
 public value class VaultName private constructor(val value: String) {
   

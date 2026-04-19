@@ -1,4 +1,4 @@
-import { Branded } from "../../x.ts";
+import { Branded } from "@internal/prelude";
 
 const brand = Symbol();
 

@@ -1,5 +1,5 @@
-import { Float, Integer, Nullable } from "../../x.ts";
-import { Scalar } from "./mod.ts";
+import { Float, Integer, Nullable } from "@internal/prelude";
+import { Scalar } from "@internal/database/prelude";
 
 export interface OrderedWriteDestination<Destination> {
   writeNull: (destination: Destination) => void;
