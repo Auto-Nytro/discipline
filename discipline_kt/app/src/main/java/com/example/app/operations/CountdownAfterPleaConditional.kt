@@ -1,50 +1,64 @@
-package com.example.procedures.countdownafterpleaconditional
+package com.example.app
 
-import com.example.app.*
 import com.example.app.database.*
 
-sealed class ReactivateReturn {
-  class Database(val error: Throwable) : ReactivateReturn() {}
-  class Success() : ReactivateReturn() {}
-}
-
-fun reactivate(
-  database: DatabaseConnection,
-  adapter: CountdownAfterPleaConditionalDbAdapter,
-  location: CountdownAfterPleaConditionalLocation,
-  conditional: CountdownAfterPleaConditional,
-): ReactivateReturn {
-  try {
-    adapter.reactivateOrThrow(database, location)
-  } catch (exception: Throwable) {
-    return ReactivateReturn.Database(exception)
+object CountdownAfterPleaConditionalProcedures {
+  sealed class ReactivateReturn {
+    class NoSuchConditional(val value: GetCountdownAfterPleaConditionalError) : ReactivateReturn() {}
+    class Database(val error: Throwable) : ReactivateReturn() {}
+    class Success() : ReactivateReturn() {}
   }
 
-  conditional.reactivate()
-  return ReactivateReturn.Success()
-}
+  fun reactivate(
+    state: State,
+    database: Database,
+    locator: CountdownAfterPleaConditionalLocation,
+  ): ReactivateReturn {
+    val conditional = state.getCountdownAfterPleaConditional(locator).let {
+      when (it) {
+        is Tried.Success -> it.value,
+        is Tried.Failure -> return ReactivateReturn.NoSuchConditional(it.error)
+      }
+    }
 
-sealed class ReDeactivateReturn {
-  class Database(val error: Throwable) : ReDeactivateReturn() {}
-  class Success() : ReDeactivateReturn() {}
-}
+    try {
+      database.reactivateCountdownAfterPleaConditional(locator)
+    } catch (exception: Throwable) {
+      return ReactivateReturn.Database(exception)
+    }
 
-fun reDeactivate(
-  database: DatabaseConnection,
-  adapter: CountdownAfterPleaConditionalDbAdapter,
-  location: CountdownAfterPleaConditionalLocation,
-  conditional: CountdownAfterPleaConditional,
-  clock: MonotonicClock,
-): ReDeactivateReturn {
-  val now = clock.getNow()
-  val reDeactivateState = conditional.createReDeactivateState(now)
-
-  try {
-    adapter.reDeactivateOrThrow(database, location, reDeactivateState)
-  } catch (exception: Throwable) {
-    return ReDeactivateReturn.Database(exception)
+    conditional.reactivate()
+    return ReactivateReturn.Success()
   }
 
-  conditional.reDeactivateFromState(reDeactivateState)
-  return ReDeactivateReturn.Success()
+  sealed class ReDeactivateReturn {
+    class NonExisting(val error: GetCountdownAfterPleaConditionalError) : ReDeactivateReturn() {}
+    class Database(val error: Throwable) : ReDeactivateReturn() {}
+    class Success() : ReDeactivateReturn() {}
+  }
+
+  fun reDeactivate(
+    state: State,
+    database: Database,
+    locator: CountdownAfterPleaConditionalLocation,
+  ): ReDeactivateReturn {
+    val conditional = state.getCountdownAfterPleaConditional(locator).let {
+      when (it) {
+        is Tried.Success -> it.value,
+        is Tried.Failure -> return ReDeactivateReturn.NonExisting(it.error),
+      }
+    }
+
+    val now = state.getMonotonicNow()
+    val reDeactivateState = conditional.createReDeactivateState(now)
+
+    try {
+      database.reDeactivateCountdownAfterPleaConditional(locator, reDeactivateState)
+    } catch (exception: Throwable) {
+      return ReDeactivateReturn.Database(exception)
+    }
+
+    conditional.reDeactivateFromState(reDeactivateState)
+    return ReDeactivateReturn.Success()
+  }
 }

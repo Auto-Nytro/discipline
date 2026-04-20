@@ -1,8 +1,11 @@
 package com.example.app
 
-object AlwaysRuleProcedure {
+import com.example.app.database.*
+
+object AlwaysRuleProcedures {
   sealed class CreateReturn {
-    class TooManyRules() : CreateReturn() {}
+    class PermissionError(val value: GetCreateRulePermissionError) : CreateReturn() {}
+    class GetGroupInfo(val value: GetAlwaysRuleGroupInfoError) : CreateReturn() {}
     class InternalError(val error: Throwable) : CreateReturn() {}
     class Success(val id: AlwaysRuleId, val rule: AlwaysRule) : CreateReturn() {}
   }
@@ -13,11 +16,15 @@ object AlwaysRuleProcedure {
     ruleGroupId: AlwaysRuleGroupId,
     ruleEnablerCreator: RuleEnabler.Creator,
   ): CreateReturn {
-    val ruleGroupInfo = state.getAlwaysRuleGroupInfo(ruleGroupId)
-    
-    val statsPermission = state.rulesStats.mayCreateAlwaysRuleInRuleGroup(ruleGroupInfo, ruleGroupId).
-    if statsPermission is RulesStats.Permission.No {
-      return CreateReturn.TooManyRules(statsPermission.reason)
+    val ruleGroupLocation = state.getAlwaysRuleGroupLocation(ruleGroupId).let {
+      when (it) {
+        is Tried.Failure -> {
+          return CreateReturn.GetGroupInfo(it.error)
+        }
+        is Tried.Success -> {
+          it.value
+        }
+      }
     }
 
     val rule = AlwaysRule.create(
@@ -25,12 +32,12 @@ object AlwaysRuleProcedure {
     )
 
     val ruleId = try {
-      database.createAlwaysRuleOrThrow(ruleGroupInfo, ruleGroupId, rule)
+      database.createAlwaysRule(ruleGroupLocation, ruleGroupId, rule)
     } catch (exception: Throwable) {
       return CreateReturn.InternalError(exception)
     }
-    
-    state.addAlwaysRuleOrNoop(ruleGroupInfo, ruleGroupId, ruleId, rule)
+
+    state.createAlwaysRuleOrNoop(ruleGroupLocation, ruleId, rule)
     return CreateReturn.Success(ruleId, rule)
   }
 

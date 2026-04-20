@@ -1,75 +1,96 @@
-package com.example.app.procedures.timeallowancerule
+package com.example.app
 
-import com.example.app.*
 import com.example.app.database.*
 
-sealed class CreateReturn {
-  class TooManyRules() : CreateReturn() {}
-  class DuplicateRuleId() : CreateReturn() {}
-  class Database(val error: Throwable) : CreateReturn() {}
-  class Success(val id: TimeAllowanceRuleId, val rule: TimeAllowanceRule) : CreateReturn() {}
-}
-
-fun create(
-  database: DatabaseConnection,
-  adapter: TimeAllowanceRuleDbAdapter,
-  location: TimeAllowanceRuleLocation,
-  rules: TimeAllowanceRules,
-  stats: RulesStats,
-  totalAllowance: Duration,
-  enablerCreator: RuleEnabler.Creator,
-): CreateReturn {
-  if (stats.isFull()) {
-    return CreateReturn.TooManyRules()
+object TimeAllowanceRuleProcedures {
+  sealed class CreateReturn {
+    class PermissionError(val value: GetCreateRulePermissionError) : CreateReturn() {}
+    class GetGroupInfo(val value: GetTimeAllowanceRuleGroupInfoError) : CreateReturn() {}
+    class InternalError(val error: Throwable) : CreateReturn() {}
+    class Success(val id: TimeAllowanceRuleId, val rule: TimeAllowanceRule) : CreateReturn() {}
   }
 
-  val rule = TimeAllowanceRule(
-    enabler = enablerCreator.create(),
-    allowance = totalAllowance,
-  )
+  fun create(
+    state: State,
+    database: Database,
+    ruleGroupId: TimeAllowanceRuleGroupId,
+    ruleEnablerCreator: RuleEnabler.Creator,
+    totalAllowance: Duration,
+  ): CreateReturn {
+    val ruleGroupLocation = state.getTimeAllowanceRuleGroupLocation(ruleGroupId).let {
+      when (it) {
+        is Tried.Failure -> {
+          return CreateReturn.GetGroupInfo(it.error)
+        }
+        is Tried.Success -> {
+          it.value
+        }
+      }
+    }
 
-  val ruleId = try {
-    adapter.createOrThrow(database, location, rule)
-  } catch (exception: Throwable) {
-    return CreateReturn.Database(exception)
+    val rule = TimeAllowanceRule.create(
+      enabler = ruleEnablerCreator.create(),
+      allowance = totalAllowance,
+    )
+
+    val ruleId = try {
+      database.createTimeAllowanceRule(ruleGroupLocation, ruleGroupId, rule)
+    } catch (exception: Throwable) {
+      return CreateReturn.InternalError(exception)
+    }
+
+    state.createTimeAllowanceRuleOrNoop(ruleGroupLocation, ruleId, rule)
+    return CreateReturn.Success(ruleId, rule)
   }
 
-  rules.add(ruleId, rule)
-  stats.updateAfterTimeAllowanceRuleCreated()
-  return CreateReturn.Success(ruleId, rule)
-}
-
-sealed class DeleteReturn {
-  class NoSuchRule() : DeleteReturn() {}
-  class PermissionDenied() : DeleteReturn() {}
-  class Database(val error: Throwable) : DeleteReturn() {}
-  class Success(val rule: TimeAllowanceRule) : DeleteReturn() {}
-}
-
-fun delete(
-  database: DatabaseConnection,
-  adapter: TimeAllowanceRuleDbAdapter, 
-  location: TimeAllowanceRuleLocation,
-  rules: TimeAllowanceRules,
-  stats: RulesStats,
-  ruleId: TimeAllowanceRuleId,
-  clock: MonotonicClock,
-): DeleteReturn {
-  val rule = rules.get(ruleId)
-    ?: return DeleteReturn.NoSuchRule()
-
-  val now = clock.getNow()
-  if (rule.isEnabled(now)) {
-    return DeleteReturn.PermissionDenied()
+  sealed class DeleteReturn {
+    class RuleEnabled() : DeleteReturn() {}
+    class NoSuchRuleGroup(val value: GetTimeAllowanceRuleGroupInfoError) : DeleteReturn() {}
+    class NoSuchRule(val value: GetTimeAllowanceRuleError) : DeleteReturn() {}
+    class InternalError(val error: Throwable) : DeleteReturn() {}
+    class Success(val rule: TimeAllowanceRule) : DeleteReturn() {}
   }
 
-  try {
-    adapter.deleteOrThrow(database, location, ruleId)
-  } catch (exception: Throwable) {
-    return DeleteReturn.Database(exception)
-  }
+  fun delete(
+    state: State,
+    database: Database,
+    ruleGroupId: TimeAllowanceRuleGroupId,
+    ruleId: TimeAllowanceRuleId,
+  ): DeleteReturn {
+    val ruleGroupLocation = state.getTimeAllowanceRuleGroupLocation(ruleGroupId).let {
+      when (it) {
+        is Tried.Success -> {
+          it.value
+        }
+        is Tried.Failure -> {
+          return DeleteReturn.NoSuchRuleGroup(it.error)
+        }
+      }
+    }
 
-  rules.remove(ruleId)
-  stats.updateAfterTimeAllowanceRuleDeleted()
-  return DeleteReturn.Success(rule)
+    val rule = state.getTimeAllowanceRule(ruleGroupLocation, ruleId).let {
+      when (it) {
+        is Tried.Success -> {
+          it.value
+        }
+        is Tried.Failure -> {
+          return DeleteReturn.NoSuchRule(it.error)
+        }
+      }
+    }
+
+    val now = state.getMonotonicNow()
+    if (rule.isEnabled(now)) {
+      return DeleteReturn.RuleEnabled()
+    }
+
+    try {
+      database.deleteTimeAllowanceRule(ruleGroupLocation, ruleGroupId, ruleId)
+    } catch (exception: Throwable) {
+      return DeleteReturn.InternalError(exception)
+    }
+    
+    state.deleteTimeAllowanceRuleOrNoop(ruleGroupLocation, ruleId)
+    return DeleteReturn.Success(rule)
+  }
 }

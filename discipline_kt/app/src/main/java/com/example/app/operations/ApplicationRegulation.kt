@@ -1,40 +1,44 @@
 package com.example.app
 
+import com.example.app.database.*
+
+class ApplicationRegulationGroupId() {}
+class ApplicationRegulationGroupLocationInfo() {}
+class ApplicationRegulationGroupsMap() {}
+
 object ApplicationRegulationProcedure {
-    sealed class CreateReturn {
+  sealed class CreateReturn {
     class TooManyRegulations() : CreateReturn() {}
-    class DuplicateRegulationId() : CreateReturn() {}
+    class ApplicationAlreadyRegulated() : CreateReturn() {}
     class InternalError(val error: Throwable) : CreateReturn() {}
     class Success(val app: ApplicationName, val regulation: ApplicationRegulation) : CreateReturn() {}
   }
 
   fun create(
-    database: DatabaseConnection,
-    adapter: ApplicationRegulationDbAdapter,
+    state: State,
+    database: Database,
     location: ApplicationRegulationLocation,
-    regulations: ApplicationRegulations,
-    regulationsStats: ApplicationRegulationsStats,
     applicationName: ApplicationName,
-  ) {
-    if (regulationsStats.isFull()) {
+  ): CreateReturn {
+    if (state.applicationRegulationsStats.isFull()) {
       return CreateReturn.TooManyRegulations()
     }
     
-    if (context.regulations.has(applicationName)) {
-      return CreateReturn.DuplicateRegulationId()
+    if (state.mainUserProfile.applicationRegulations.has(applicationName)) {
+      return CreateReturn.ApplicationAlreadyRegulated()
     }
 
     val regulation = ApplicationRegulation.createDefault()
 
     try {
-      adapter.createOrThrow(database, location, applicationName, regulation)
+      database.createApplicationRegulation(location, applicationName)
     } catch (exception: Throwable) {
       return CreateReturn.InternalError(exception)
     }
 
-    regulations.add(app, regulation)
-    regulationsStats.applicationRegulationsNumber += 1
-    return CreateReturn.Success(app, regulation)
+    state.mainUserProfile.applicationRegulations.add(applicationName, regulation)
+    state.applicationRegulationsStats.applicationRegulationsNumber += 1
+    return CreateReturn.Success(applicationName, regulation)
   }
 
   sealed class DeleteReturn {
@@ -45,30 +49,30 @@ object ApplicationRegulationProcedure {
   }
 
   fun delete(
-    database: DatabaseConnection,
-    adapter: ApplicationRegulationDbAdapter,
+    state: State,
+    database: Database,
     location: ApplicationRegulationLocation,
-    regulations: ApplicationRegulations,
-    regulationsStats: ApplicationRegulationsStats,
     applicationName: ApplicationName,
-    clock: MonotonicClock,
   ): DeleteReturn {
+    val regulations = state.mainUserProfile.applicationRegulations
+    val stats = state.applicationRegulationsStats
+
     val regulation = regulations.get(applicationName)
       ?: return DeleteReturn.NoSuchApplicationRegulation()
 
-    val now = clock.getNow()
+    val now = state.getMonotonicNow()
     if (regulation.isEnabled(now)) {
       return DeleteReturn.PermissionDenied()
     }
 
     try {
-      adapter.deleteOrThrow(database, location, applicationName)
+      database.deleteApplicationRegulation(location, applicationName)
     } catch (exception: Throwable) {
-      return Return.InternalError(exception)
+      return DeleteReturn.InternalError(exception)
     }
 
-    regulations.remove(app)
-    regulationsStats.applicationRegulationsNumber -= 1
+    regulations.remove(applicationName)
+    stats.applicationRegulationsNumber -= 1
     return DeleteReturn.Success(regulation)
   }
 }

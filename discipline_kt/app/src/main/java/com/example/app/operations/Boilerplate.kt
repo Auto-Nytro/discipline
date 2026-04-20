@@ -7,9 +7,9 @@ sealed class CountdownConditionalLocation {
   class MainUserProfileScreenRegulationTimeRangeRuleEnabler(val ruleId: TimeRangeRuleId) : CountdownConditionalLocation() {}
   class MainUserProfileScreenRegulationDailyTimeAllowanceRuleEnabler(val ruleId: TimeAllowanceRuleId) : CountdownConditionalLocation() {}
 
-  class MainUserProfileApplicationRegulationAlwaysRuleEnabler(val ruleId: AlwaysRuleId) : CountdownConditionalLocation() {}
-  class MainUserProfileApplicationRegulationTimeRangeRuleEnabler(val ruleId: TimeRangeRuleId) : CountdownConditionalLocation() {}
-  class MainUserProfileApplicationRegulationDailyTimeAllowanceRuleEnabler(val ruleId: TimeAllowanceRuleId) : CountdownConditionalLocation() {}
+  class MainUserProfileApplicationRegulationAlwaysRuleEnabler(val ruleId: AlwaysRuleId, val applicationName: ApplicationName) : CountdownConditionalLocation() {}
+  class MainUserProfileApplicationRegulationTimeRangeRuleEnabler(val ruleId: TimeRangeRuleId, val applicationName: ApplicationName) : CountdownConditionalLocation() {}
+  class MainUserProfileApplicationRegulationDailyTimeAllowanceRuleEnabler(val ruleId: TimeAllowanceRuleId, val applicationName: ApplicationName) : CountdownConditionalLocation() {}
 
   class MainUserProfileVaultProtector(val vaultId: UuidV4) : CountdownConditionalLocation() {}
 }
@@ -28,9 +28,9 @@ sealed class CountdownAfterPleaConditionalLocation {
   class MainUserProfileScreenRegulationTimeRangeRuleEnabler(val ruleId: TimeRangeRuleId) : CountdownAfterPleaConditionalLocation() {}
   class MainUserProfileScreenRegulationDailyTimeAllowanceRuleEnabler(val ruleId: TimeAllowanceRuleId) : CountdownAfterPleaConditionalLocation() {}
 
-  class MainUserProfileApplicationRegulationAlwaysRuleEnabler(val ruleId: AlwaysRuleId) : CountdownAfterPleaConditionalLocation() {}
-  class MainUserProfileApplicationRegulationTimeRangeRuleEnabler(val ruleId: TimeRangeRuleId) : CountdownAfterPleaConditionalLocation() {}
-  class MainUserProfileApplicationRegulationDailyTimeAllowanceRuleEnabler(val ruleId: TimeAllowanceRuleId) : CountdownAfterPleaConditionalLocation() {}
+  class MainUserProfileApplicationRegulationAlwaysRuleEnabler(val ruleId: AlwaysRuleId, val applicationName: ApplicationName) : CountdownAfterPleaConditionalLocation() {}
+  class MainUserProfileApplicationRegulationTimeRangeRuleEnabler(val ruleId: TimeRangeRuleId, val applicationName: ApplicationName) : CountdownAfterPleaConditionalLocation() {}
+  class MainUserProfileApplicationRegulationDailyTimeAllowanceRuleEnabler(val ruleId: TimeAllowanceRuleId, val applicationName: ApplicationName) : CountdownAfterPleaConditionalLocation() {}
 
   class MainUserProfileVaultProtector(val vaultId: UuidV4) : CountdownAfterPleaConditionalLocation() {}
 }
@@ -66,7 +66,7 @@ sealed class TimeAllowanceRuleLocateError {
 
 sealed class TimeAllowanceRuleLocation {
   class MainUserProfileScreenRegulationDailyTimeAllowance(val regulationId: ApplicationRegulationId) : TimeAllowanceRuleLocation() {}
-  class MainUserProfileApplicationRegulationDailyTimeAllowance(val regulationId: ApplicationRegulationId) : TimeAllowanceRuleLocation() {}
+  class MainUserProfileApplicationRegulationDailyTimeAllowance(val regulationId: ApplicationRegulationId, val applicationName: ApplicationName) : TimeAllowanceRuleLocation() {}
 }
 
 sealed class ApplicationRegulationLocateError() {
@@ -85,35 +85,35 @@ sealed class VaultLocation() {
   class MainUserProfile() : VaultLocation() {}
 }
 
-object Procedures {
-  suspend fun createApplicationRegulation(
-    database: DatabaseConnection,
-    state: State,
-    location: ApplicationRegulationLocation, 
-    applicationName: ApplicationName,
-  ): com.example.app.procedures.applicationregulation.CreateReturn {
-    return when (location) {
-      is ApplicationRegulationLocation.MainUserProfile -> {
-        com.example.app.procedures.applicationregulation.create(
-          database,
-          ApplicationRegulationDbAdapter,
-          location,
-          state.mainUserProfile.applicationRegulations,
-          state.applicationRegulationsStats,
-          applicationName,
-        )
-      }
-    }
-  }
+// object Procedures {
+//   suspend fun createApplicationRegulation(
+//     database: DatabaseConnection,
+//     state: State,
+//     location: ApplicationRegulationLocation, 
+//     applicationName: ApplicationName,
+//   ): com.example.app.procedures.applicationregulation.CreateReturn {
+//     return when (location) {
+//       is ApplicationRegulationLocation.MainUserProfile -> {
+//         com.example.app.procedures.applicationregulation.create(
+//           database,
+//           ApplicationRegulationDbAdapter,
+//           location,
+//           state.mainUserProfile.applicationRegulations,
+//           state.applicationRegulationsStats,
+//           applicationName,
+//         )
+//       }
+//     }
+//   }
 
-  suspend fun deleteApplicationRegulation(
-    database: DatabaseConnection,
-    state: State,
-    location: ApplicationRegulationLocation, 
-    regulationId: ApplicationRegulationId,
-  ) {
-    when (location) {
-      is ApplicationREgulationLocation.
-    }
-  }
-}
+//   suspend fun deleteApplicationRegulation(
+//     database: DatabaseConnection,
+//     state: State,
+//     location: ApplicationRegulationLocation, 
+//     regulationId: ApplicationRegulationId,
+//   ) {
+//     when (location) {
+//       is ApplicationREgulationLocation.
+//     }
+//   }
+// }
